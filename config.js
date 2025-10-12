@@ -28,7 +28,7 @@ window.B05_CONFIGS = {
     USE_DAYS: [2, 5]
   },
 
-  "29MUH431": {
+  "LOVEME": {
     Food: "LOVEME",
     PREFIX: "29-MUH-",
     latestLotNumber: "29-MUH-431",
@@ -39,7 +39,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 30,
     MONTHS_BACK: 6,
-    USE_DAYS: [1]
+    USE_DAYS: [0]
   },
 
   "29MUH430": {
