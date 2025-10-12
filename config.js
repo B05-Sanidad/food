@@ -34,18 +34,6 @@ window.B05_CONFIGS = {
     USADO: "Mezze",
     CHEF: "Chef B05",
     EXP_DAYS: 10, MONTHS_BACK: 6, USE_DAYS: [1]
-  },
-
-  "13HOJ654": {
-    Food: "HOJAS DE PARRA",
-    PREFIX: "13-HOJ-",
-    latestLotNumber: "13-HOJ-654",
-    PRODUCTO: "Hojas de parra cocidas, arroz, tomate, cebolla, perejil, menta, aceite de oliva, limón",
-    ORIGEN: "Makro / Carrefour / Oasis",
-    LOTE: "Hojas Parra Oasis, arroz Consum",
-    USADO: "HOJAS",
-    CHEF: "Chef B05",
-    EXP_DAYS: 15, MONTHS_BACK: 6, USE_DAYS: [4]
   }
 
 };
