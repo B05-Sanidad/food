@@ -12,6 +12,7 @@ window.B05_CONFIGS = {
     EXP_DAYS: 4,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 4,   // ⬅️ histórico cada 4 días (nunca lunes)
+     PROD_ANCHOR: "2025-01-01",
     USE_DAYS: [2, 5]      // (solo se usa si NO hay DAYS_PRODUCTION)
   },
 
@@ -27,6 +28,7 @@ window.B05_CONFIGS = {
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 7,   // ⬅️ histórico cada 7 días (nunca lunes)
+     PROD_ANCHOR: "2025-01-01",
     USE_DAYS: [2, 5]
   },
 
@@ -42,6 +44,7 @@ window.B05_CONFIGS = {
     EXP_DAYS: 180,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 20,  // ⬅️ histórico cada 20 días (nunca lunes)
+     PROD_ANCHOR: "2025-01-01",
     USE_DAYS: [2]         // valor válido 0..6; aquí martes (no se usa si hay DAYS_PRODUCTION)
   },
 
@@ -57,6 +60,7 @@ window.B05_CONFIGS = {
     EXP_DAYS: 10,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 15,  // ⬅️ histórico cada 15 días (nunca lunes)
+     PROD_ANCHOR: "2025-01-01",
     USE_DAYS: [1]         // lunes (solo si NO hay DAYS_PRODUCTION)
   },
 
@@ -72,6 +76,7 @@ window.B05_CONFIGS = {
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 20,  // ⬅️ histórico cada 20 días (nunca lunes)
+    PROD_ANCHOR: "2025-01-01",
     USE_DAYS: [2, 5]
   }
 };

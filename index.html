@@ -13,7 +13,7 @@
     .btn{border-radius:.6rem;padding:.4rem .8rem;font-weight:600;cursor:pointer;border:1px solid #e5e7eb;background:#fff;}
     .btn-brand{background:var(--brand);color:#fff;border-color:var(--brand);}
     main{padding:1rem 1.5rem 3rem;flex-grow:1;}
-    .card{background:#fff;border-radius:1rem;box-shadow:0 8px 30px rgba(0,0,0,.06);max-width:1100px;margin:0 auto;padding:1rem;overflow-x: auto;}
+    .card{background:#fff;border-radius:1rem;box-shadow:0 8px 30px rgba(0,0,0,.06);max-width:1100px;margin:0 auto;padding:1rem;overflow-x:auto;}
     h3{margin:.5rem 0;color:#334155;}
     table{width:100%;border-collapse:separate;border-spacing:0;font-size:.85rem;margin-top:.5rem;}
     th,td{padding:.6rem .75rem;text-align:left;border-bottom:1px solid #e2e8f0;vertical-align:top;}
@@ -44,7 +44,7 @@
   <main id="app"></main>
 
   <script>
-    // ---------- Safe key detection (no redirects) ----------
+    // ---------- Key detection ----------
     function getKeyFromUrl() {
       const parts = location.pathname.replace(/\/+/g,'/').split('/').filter(Boolean);
       const keyFromPath  = (parts[0]==='food' && parts.length>=2) ? (parts[1]||'').toUpperCase() : '';
@@ -58,24 +58,40 @@
     const KEY = getKeyFromUrl();
     const CONFIG = KEY ? CONFIGS[KEY] : null;
 
-    // ---------- Small helpers ----------
+    // ---------- Helpers ----------
     const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
     const fmtESdate = d => fmtES.format(d);
     const atNoon = d => { const x=new Date(d); x.setHours(12,0,0,0); return x; };
     const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
     const el = (tag, attrs={}, html='') => { const e=document.createElement(tag); for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v); if (html) e.innerHTML=html; return e; };
 
-    // === choose the most recent production date (interval vs weekday mode)
+    // Parse "YYYY-MM-DD" to Date at noon
+    function parseISODate(iso){
+      const [Y,M,D] = String(iso||'').split('-').map(Number);
+      if (!Y || !M || !D) return atNoon(new Date(2025,0,1)); // sane default
+      return atNoon(new Date(Y, M-1, D));
+    }
+
+    // Snap refDate back onto the N-day grid defined by anchor
+    function snapToInterval(refDate, stepDays, anchorDate){
+      const msPerDay = 86400000;
+      const ref = atNoon(refDate).getTime();
+      const anchor = atNoon(anchorDate).getTime();
+      const daysFromAnchor = Math.floor((ref - anchor) / msPerDay);
+      const k = Math.floor(daysFromAnchor / stepDays);
+      return addDays(anchorDate, k * stepDays);
+    }
+
+    // Most recent production date (interval mode with Monday-avoid; else weekday mode)
     function mostRecentProduction(refDate, cfg){
       const step = Number(cfg.DAYS_PRODUCTION);
-      if (Number.isInteger(step) && step > 0) {
-        const y = new Date(refDate);
-        y.setDate(y.getDate() - 1);        // start from yesterday
-        // never Monday (1): move back to Sunday
-        if (y.getDay() === 1) y.setDate(y.getDate() - 1);
-        return atNoon(y);
+      if (Number.isInteger(step) && step > 0){
+        const anchor = cfg.PROD_ANCHOR ? parseISODate(cfg.PROD_ANCHOR) : parseISODate("2025-01-01");
+        let snapped = snapToInterval(addDays(refDate, -1), step, anchor); // start from yesterday
+        if (snapped.getDay() === 1) snapped = addDays(snapped, -1);      // Monday -> Sunday
+        return atNoon(snapped);
       }
-      // fallback: weekday mode
+      // Weekday mode fallback
       const USE_DAYS = cfg.USE_DAYS || [];
       const y = new Date(refDate);
       y.setDate(y.getDate() - 1);
@@ -83,31 +99,33 @@
       return atNoon(y);
     }
 
-    // === build Historic series (interval vs weekday)
+    // Historic series (interval mode keeps strict N-day cadence; Monday -> Sunday)
     function buildDateSeriesDynamic(latest, cfg){
       const monthsBack = cfg.MONTHS_BACK || 6;
-      const start = atNoon(new Date(latest));
-      start.setMonth(start.getMonth() - monthsBack);
+      const start = atNoon(new Date(latest)); start.setMonth(start.getMonth() - monthsBack);
 
       const step = Number(cfg.DAYS_PRODUCTION);
       const dates = [];
 
-      if (Number.isInteger(step) && step > 0) {
-        // latest, latest - step, latest - 2*step, ...
-        for (let cur = new Date(latest); cur >= start; cur.setDate(cur.getDate() - step)) {
-          const d = new Date(cur);
-          // never Monday: if Monday, shift to Sunday
-          if (d.getDay() === 1) d.setDate(d.getDate() - 1);
+      if (Number.isInteger(step) && step > 0){
+        const anchor = cfg.PROD_ANCHOR ? parseISODate(cfg.PROD_ANCHOR) : parseISODate("2025-01-01");
+        const msPerDay = 86400000;
+        const kLatest = Math.floor((latest.getTime() - anchor.getTime())/msPerDay / step);
+
+        for (let k = kLatest; ; k--){
+          let d = addDays(anchor, k * step);
+          if (d.getDay() === 1) d = addDays(d, -1); // Monday -> Sunday
+          if (d < start) break;
           dates.push(atNoon(d));
         }
-      } else {
-        // weekday mode
-        const USE_DAYS = cfg.USE_DAYS || [];
-        const d = new Date(latest);
-        d.setDate(d.getDate() - 1);
-        for (let cur = new Date(d); cur >= start; cur.setDate(cur.getDate() - 1)) {
-          if (USE_DAYS.includes(cur.getDay())) dates.push(atNoon(new Date(cur)));
-        }
+        return dates;
+      }
+
+      // Weekday mode fallback
+      const USE_DAYS = cfg.USE_DAYS || [];
+      const d = new Date(latest); d.setDate(d.getDate() - 1);
+      for (let cur = new Date(d); cur >= start; cur.setDate(cur.getDate() - 1)){
+        if (USE_DAYS.includes(cur.getDay())) dates.push(atNoon(new Date(cur)));
       }
       return dates;
     }
@@ -181,7 +199,7 @@
           </table>
         </div>`;
 
-      // Latest lot (based on interval / weekday)
+      // Latest lot based on interval/weekday rules
       const latest = mostRecentProduction(new Date(), cfg);
       const exp    = addDays(latest, EXP_DAYS);
 
@@ -194,7 +212,7 @@
       document.getElementById('usado').textContent    = USADO;
       document.getElementById('chef').textContent     = CHEF;
 
-      // Historic series
+      // Historic rows
       const tbody  = document.getElementById('tbody');
       const series = buildDateSeriesDynamic(latest, cfg);
 
@@ -214,13 +232,13 @@
       });
     }
 
-    // ---------- Render (with visible error if config.js failed) ----------
+    // ---------- Render ----------
     try {
       const keys = Object.keys(CONFIGS);
       if (!keys.length) {
         renderError('No se pudo cargar config.js',
           `<p>Revise que <code>/food/config.js</code> existe y no tenga errores de sintaxis.</p>
-           <p>Pruebe a forzar refresco: <code>Ctrl+F5</code> (Windows) o <code>⌘⇧R</code> (Mac).</p>`);
+           <p>Fuerce refresco: <code>Ctrl+F5</code> (Windows) o <code>⌘⇧R</code> (Mac).</p>`);
       } else if (!KEY) {
         renderLanding(keys);
       } else if (!CONFIG) {
@@ -235,11 +253,26 @@
       console.error(e);
     }
 
-    // Buttons (stay on page; no redirects)
+    // Buttons (stay on page)
     document.getElementById('closeBtn').onclick = () => history.pushState({}, '', '/food/');
     document.getElementById('printBtn').onclick = () => window.print();
     document.getElementById('exportPdfBtn').onclick = () => window.print();
-    document.getElementById('exportCsvBtn').onclick = () => { /* filled only in details view */ };
+    document.getElementById('exportCsvBtn').onclick = () => {
+      const body = document.querySelector('table[aria-label="Histórico de lotes"] tbody');
+      if (!body) return;
+      const rows = [["Date","Expiration Date","Lot #","Product / Ingredients","Origin / Supplier","Lot / Batch","Used in","Prepared by"]];
+      [...body.querySelectorAll('tr')].forEach(tr=>{
+        const cells = [...tr.children].map(td => '"'+ (td.textContent||'').replaceAll('"','""') +'"');
+        rows.push(cells);
+      });
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeName = (document.getElementById('title').textContent || 'producto').toLowerCase().replaceAll(' ', '_');
+      a.href = url; a.download = `B05_traceability_${safeName}_6m.csv`; a.click();
+      URL.revokeObjectURL(url);
+    };
   </script>
 </body>
 </html>
