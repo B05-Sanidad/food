@@ -25,7 +25,7 @@
     @media print{header{display:none!important;}main{padding:0;}.card{box-shadow:none;margin:0;padding:0;}th{position:static;}}
   </style>
 
-  <!-- Always pull a fresh config.js (cache-buster) -->
+  <!-- Always load the latest config.js (cache-buster) -->
   <script>
     document.write('<script src="/food/config.js?v=' + Date.now() + '"><\/script>');
   </script>
@@ -44,7 +44,7 @@
   <main id="app"></main>
 
   <script>
-    // ---------- Key detection ----------
+    // --- Key detection (no redirects) ---
     function getKeyFromUrl() {
       const parts = location.pathname.replace(/\/+/g,'/').split('/').filter(Boolean);
       const keyFromPath  = (parts[0]==='food' && parts.length>=2) ? (parts[1]||'').toUpperCase() : '';
@@ -58,60 +58,51 @@
     const KEY = getKeyFromUrl();
     const CONFIG = KEY ? CONFIGS[KEY] : null;
 
-    // ---------- Helpers ----------
+    // --- Helpers ---
     const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
     const fmtESdate = d => fmtES.format(d);
     const atNoon = d => { const x=new Date(d); x.setHours(12,0,0,0); return x; };
     const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
     const el = (tag, attrs={}, html='') => { const e=document.createElement(tag); for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v); if (html) e.innerHTML=html; return e; };
 
-    // Parse "YYYY-MM-DD" to Date at noon
+    // --- Interval logic with optional anchor; Monday -> Sunday ---
     function parseISODate(iso){
       const [Y,M,D] = String(iso||'').split('-').map(Number);
-      if (!Y || !M || !D) return atNoon(new Date(2025,0,1)); // sane default
+      if (!Y || !M || !D) return atNoon(new Date(2025,0,1));
       return atNoon(new Date(Y, M-1, D));
     }
-
-    // Snap refDate back onto the N-day grid defined by anchor
     function snapToInterval(refDate, stepDays, anchorDate){
       const msPerDay = 86400000;
       const ref = atNoon(refDate).getTime();
       const anchor = atNoon(anchorDate).getTime();
-      const daysFromAnchor = Math.floor((ref - anchor) / msPerDay);
+      const daysFromAnchor = Math.floor((ref - anchor)/msPerDay);
       const k = Math.floor(daysFromAnchor / stepDays);
       return addDays(anchorDate, k * stepDays);
     }
-
-    // Most recent production date (interval mode with Monday-avoid; else weekday mode)
     function mostRecentProduction(refDate, cfg){
       const step = Number(cfg.DAYS_PRODUCTION);
       if (Number.isInteger(step) && step > 0){
         const anchor = cfg.PROD_ANCHOR ? parseISODate(cfg.PROD_ANCHOR) : parseISODate("2025-01-01");
-        let snapped = snapToInterval(addDays(refDate, -1), step, anchor); // start from yesterday
-        if (snapped.getDay() === 1) snapped = addDays(snapped, -1);      // Monday -> Sunday
+        let snapped = snapToInterval(addDays(refDate, -1), step, anchor);
+        if (snapped.getDay() === 1) snapped = addDays(snapped, -1); // Monday -> Sunday
         return atNoon(snapped);
       }
-      // Weekday mode fallback
-      const USE_DAYS = cfg.USE_DAYS || [];
-      const y = new Date(refDate);
-      y.setDate(y.getDate() - 1);
-      while(!USE_DAYS.includes(y.getDay())) y.setDate(y.getDate() - 1);
+      // Fallback: weekday mode with safe default
+      const days = Array.isArray(cfg.USE_DAYS) ? cfg.USE_DAYS : [];
+      const y = new Date(refDate); y.setDate(y.getDate() - 1);
+      if (days.length === 0) return atNoon(y);
+      while (!days.includes(y.getDay())) y.setDate(y.getDate() - 1);
       return atNoon(y);
     }
-
-    // Historic series (interval mode keeps strict N-day cadence; Monday -> Sunday)
     function buildDateSeriesDynamic(latest, cfg){
       const monthsBack = cfg.MONTHS_BACK || 6;
       const start = atNoon(new Date(latest)); start.setMonth(start.getMonth() - monthsBack);
-
       const step = Number(cfg.DAYS_PRODUCTION);
       const dates = [];
-
       if (Number.isInteger(step) && step > 0){
         const anchor = cfg.PROD_ANCHOR ? parseISODate(cfg.PROD_ANCHOR) : parseISODate("2025-01-01");
         const msPerDay = 86400000;
         const kLatest = Math.floor((latest.getTime() - anchor.getTime())/msPerDay / step);
-
         for (let k = kLatest; ; k--){
           let d = addDays(anchor, k * step);
           if (d.getDay() === 1) d = addDays(d, -1); // Monday -> Sunday
@@ -120,28 +111,25 @@
         }
         return dates;
       }
-
       // Weekday mode fallback
-      const USE_DAYS = cfg.USE_DAYS || [];
+      const days = Array.isArray(cfg.USE_DAYS) ? cfg.USE_DAYS : [];
       const d = new Date(latest); d.setDate(d.getDate() - 1);
       for (let cur = new Date(d); cur >= start; cur.setDate(cur.getDate() - 1)){
-        if (USE_DAYS.includes(cur.getDay())) dates.push(atNoon(new Date(cur)));
+        if (days.includes(cur.getDay())) dates.push(atNoon(new Date(cur)));
       }
       return dates;
     }
-
     function serialForDate(dateObj){
       const base = new Date(1904,0,1);
       const diff = Math.floor((dateObj - base) / (1000*60*60*24)) + 1;
       return (diff - 44000).toString();
     }
 
-    // ---------- Renderers ----------
+    // --- Renderers ---
     function renderError(title, detailsHtml){
       const app = document.getElementById('app');
       app.innerHTML = `<div class="error"><h3 style="margin:0 0 .5rem 0;">${title}</h3>${detailsHtml}</div>`;
     }
-
     function renderLanding(list){
       document.getElementById('title').textContent = 'B05 – Trazabilidad';
       const app = document.getElementById('app');
@@ -161,12 +149,10 @@
         ul.appendChild(li);
       });
     }
-
     function renderTraceability(cfg){
       const { Food, PREFIX, latestLotNumber, PRODUCTO, ORIGEN, LOTE, USADO, CHEF, EXP_DAYS } = cfg;
 
       document.getElementById('title').textContent = `${Food} – Registro de Trazabilidad – B05`;
-
       const app = document.getElementById('app');
       app.innerHTML = `
         <div class="card">
@@ -199,7 +185,7 @@
           </table>
         </div>`;
 
-      // Latest lot based on interval/weekday rules
+      // Latest lot by interval (or weekday fallback)
       const latest = mostRecentProduction(new Date(), cfg);
       const exp    = addDays(latest, EXP_DAYS);
 
@@ -212,7 +198,7 @@
       document.getElementById('usado').textContent    = USADO;
       document.getElementById('chef').textContent     = CHEF;
 
-      // Historic rows
+      // Historic series
       const tbody  = document.getElementById('tbody');
       const series = buildDateSeriesDynamic(latest, cfg);
 
@@ -232,7 +218,7 @@
       });
     }
 
-    // ---------- Render ----------
+    // --- Render flow ---
     try {
       const keys = Object.keys(CONFIGS);
       if (!keys.length) {

@@ -11,8 +11,8 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 7,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 7,                 // → produce cada 7 días
-    PROD_ANCHOR: "2025-10-01"           // → primer lote base
+    DAYS_PRODUCTION: 7,                 // cada 7 días
+    PROD_ANCHOR: "2025-10-01"           // fecha base para alinear el histórico
   },
 
   "11BER610": {
@@ -26,7 +26,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 10,                // → cada 10 días
+    DAYS_PRODUCTION: 10,                // cada 10 días
     PROD_ANCHOR: "2025-09-10"
   },
 
@@ -41,7 +41,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 10,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 14,                // → cada 14 días
+    DAYS_PRODUCTION: 14,                // cada 14 días
     PROD_ANCHOR: "2025-08-15"
   },
 
@@ -56,7 +56,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 12,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 30,                // → cada 20 días
+    DAYS_PRODUCTION: 20,                // cada 20 días
     PROD_ANCHOR: "2025-07-25"
   },
 
@@ -71,7 +71,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 20,                // → cada 20 días
+    DAYS_PRODUCTION: 20,                // cada 20 días
     PROD_ANCHOR: "2025-09-01"
   },
 
@@ -86,7 +86,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 4,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 10,                 // → cada 4 días
+    DAYS_PRODUCTION: 4,                 // cada 4 días
     PROD_ANCHOR: "2025-10-10"
   },
 
@@ -101,7 +101,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 4,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 20,                 // → cada 4 días
+    DAYS_PRODUCTION: 4,                 // cada 4 días
     PROD_ANCHOR: "2025-10-10"
   }
 };
