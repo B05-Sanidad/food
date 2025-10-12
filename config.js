@@ -1,4 +1,4 @@
-// /food/config.js  (pure data only)
+// /food/config.js  (PURE DATA — no URL logic, no redirects)
 window.B05_CONFIGS = {
   "5HUM517": {
     Food: "HOMMUS",
@@ -9,7 +9,9 @@ window.B05_CONFIGS = {
     LOTE: "Garbanzos L778, Tahini L120, Aceite L221",
     USADO: "Hummus",
     CHEF: "Chef B05",
-    EXP_DAYS: 4, MONTHS_BACK: 6, USE_DAYS: [2, 5]
+    EXP_DAYS: 4,
+    MONTHS_BACK: 6,
+    USE_DAYS: [2, 5]
   },
 
   "11BER610": {
@@ -21,19 +23,23 @@ window.B05_CONFIGS = {
     LOTE: "Berenjena L610, Tahini L130",
     USADO: "Baba Ghanoush",
     CHEF: "Chef B05",
-    EXP_DAYS: 5, MONTHS_BACK: 6, USE_DAYS: [2, 5]
+    EXP_DAYS: 5,
+    MONTHS_BACK: 6,
+    USE_DAYS: [2, 5]
   },
 
- "29MUH431": {
+  "29MUH431": {
     Food: "LOVEME",
     PREFIX: "29-MUH-",
-    latestLotNumber: "29-MUH-430",
+    latestLotNumber: "29-MUH-431",
     PRODUCTO: "LOvE LOVE rojo, Nueces, Melaza de granada, Pan rallado, Aceite, Especias, Sal",
     ORIGEN: "Makro / Carrefour / Oasis",
-    LOTE: "Pimiento L430, Nueces L221",
-    USADO: "Mezze",
+    LOTE: "Pimiento L431, Nueces L221", // (opcional) alineado con 431
+    USADO: "AIRE",
     CHEF: "Chef B05",
-    EXP_DAYS: 10, MONTHS_BACK: 6, USE_DAYS: [1]
+    EXP_DAYS: 10,
+    MONTHS_BACK: 6,
+    USE_DAYS: [1]
   },
 
   "29MUH430": {
@@ -45,7 +51,22 @@ window.B05_CONFIGS = {
     LOTE: "Pimiento L430, Nueces L221",
     USADO: "Mezze",
     CHEF: "Chef B05",
-    EXP_DAYS: 10, MONTHS_BACK: 6, USE_DAYS: [1]
-  }
+    EXP_DAYS: 10,
+    MONTHS_BACK: 6,
+    USE_DAYS: [1]
+  },
 
+  "11PAR702": {
+    Food: "HOJAS DE PARRA",
+    PREFIX: "11-PAR-",
+    latestLotNumber: "11-PAR-7020",
+    PRODUCTO: "Hojas de parra cocidas, arroz, tomate, cebolla, perejil, menta, aceite de oliva, limón, sal",
+    ORIGEN: "Makro / Oasis / Consum",
+    LOTE: "Hojas de parra L7020, Arroz L520, Limón L140",
+    USADO: "Hojas de Parra",
+    CHEF: "Chef B05",
+    EXP_DAYS: 5,
+    MONTHS_BACK: 6,
+    USE_DAYS: [2, 5]
+  }
 };
