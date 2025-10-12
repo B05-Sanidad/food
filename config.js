@@ -36,18 +36,6 @@ window.B05_CONFIGS = {
     EXP_DAYS: 10, MONTHS_BACK: 6, USE_DAYS: [1]
   }
 
-    "29MUH430": {
-    Food: "MOUHAMMARA",
-    PREFIX: "29-MUH-",
-    latestLotNumber: "29-MUH-430",
-    PRODUCTO: "Pimiento rojo, Nueces, Melaza de granada, Pan rallado, Aceite, Especias, Sal",
-    ORIGEN: "Makro / Carrefour / Oasis",
-    LOTE: "Pimiento L430, Nueces L221",
-    USADO: "Mezze",
-    CHEF: "Chef B05",
-    EXP_DAYS: 10, MONTHS_BACK: 6, USE_DAYS: [1]
-  }
-  
   "13HOJ654": {
     Food: "HOJAS DE PARRA",
     PREFIX: "13-HOJ-",
@@ -57,10 +45,7 @@ window.B05_CONFIGS = {
     LOTE: "Hojas Parra Oasis, arroz Consum",
     USADO: "HOJAS",
     CHEF: "Chef B05",
-    EXP_DAYS: 10, MONTHS_BACK: 6, USE_DAYS: [1]
+    EXP_DAYS: 15, MONTHS_BACK: 6, USE_DAYS: [4]
   }
-
-
-
 
 };
