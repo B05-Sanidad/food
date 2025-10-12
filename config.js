@@ -59,7 +59,7 @@ window.B05_CONFIGS = {
   "11PAR702": {
     Food: "HOJAS DE PARRA",
     PREFIX: "11-PAR-",
-    latestLotNumber: "11-PAR-7020",
+    latestLotNumber: "11-PAR-702",
     PRODUCTO: "Hojas de parra cocidas, arroz, tomate, cebolla, perejil, menta, aceite de oliva, limón, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Hojas de parra L7020, Arroz L520, Limón L140",
