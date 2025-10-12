@@ -27,10 +27,12 @@
     @media print{header{display:none!important;}main{padding:0;}
       .card{box-shadow:none;margin:0;padding:0;}th{position:static;}}
   </style>
+  <!-- ABSOLUTE path so it loads whether served via /food/index.html or /404.html -->
+  <script src="/food/config.js"></script>
 </head>
 <body>
   <header>
-    <h1 id="title">Cargando…</h1>
+    <h1 id="title">B05 – Trazabilidad</h1>
     <div>
       <button id="closeBtn" class="btn btn-brand" type="button">❌ Close</button>
       <button id="exportCsvBtn" class="btn" type="button">⬇️ Exportar CSV</button>
@@ -40,70 +42,38 @@
   </header>
 
   <main id="app">
-    <!-- We’ll inject either the landing or the traceability tables here -->
+    <!-- We render either the landing or the traceability tables here -->
   </main>
 
-  <!-- Configs -->
-  <script src="./config.js"></script>
-
   <script>
-    // -------- Find key from URL (path or ?item=...) ----------
-    const parts = location.pathname.split('/').filter(Boolean);
-    // On /food/5HUM517 -> parts = ["food","5HUM517"]
-    // On /food/ -> parts = ["food"]
-    // On /food/404 -> parts = ["food","404"]
-    let keyFromPath = parts.length >= 2 ? parts[parts.length - 1].toUpperCase() : "";
+    // -------------- Robust key detection (no redirects) -----------------
+    // Example paths:
+    //   /food/                -> no key
+    //   /food/5HUM517         -> key=5HUM517
+    //   /food/404             -> not a key (landing)
+    //   /404.html (site 404)  -> still shows landing (no key)
+    const parts = location.pathname.replace(/\/+/g, '/').split('/').filter(Boolean);
+    // On GitHub Pages project /food/, the repo root is parts[0] === 'food'
+    const repoRoot = parts[0] === 'food' ? 'food' : parts[0] || '';
+    let keyFromPath = (parts.length >= 2 && parts[0] === 'food') ? parts[1].toUpperCase() : '';
 
-    // If GitHub serves 404.html, ignore "404" as a product key
-    if (keyFromPath === '404' || keyFromPath === '404.HTML') keyFromPath = '';
+    // Never treat these as product keys
+    if (keyFromPath === 'FOOD' || keyFromPath === '404' || keyFromPath === '404.HTML' || keyFromPath === 'INDEX.HTML') {
+      keyFromPath = '';
+    }
 
     const keyFromQuery = new URLSearchParams(location.search).get('item')?.toUpperCase() || '';
     const KEY = keyFromQuery || keyFromPath;
 
-    const CONFIGS = window.B05_CONFIGS || {};
+    const CONFIGS = (window.B05_CONFIGS || {});
     const CONFIG = KEY ? CONFIGS[KEY] : null;
 
-    // --------- Render helpers ----------
-    function el(tag, attrs={}, html='') {
-      const e = document.createElement(tag);
-      Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v));
-      if (html) e.innerHTML = html;
-      return e;
-    }
-
-    function renderLanding() {
-      document.getElementById('title').textContent = 'B05 – Trazabilidad';
-      const app = document.getElementById('app');
-      app.innerHTML = '';
-      const box = el('div', {class:'card'});
-      box.innerHTML = `
-        <h3>Escanee un código QR del producto</h3>
-        <p>O abra una URL como <code>/food/5HUM517</code></p>
-        <p style="margin-top:.5rem;">
-          Ejemplos disponibles en <strong>config.js</strong>:
-        </p>
-        <ul id="keys"></ul>
-      `;
-      app.appendChild(box);
-
-      const ul = box.querySelector('#keys');
-      const keys = Object.keys(CONFIGS);
-      if (keys.length === 0) {
-        ul.innerHTML = `<li><em>No hay claves en config.js</em></li>`;
-      } else {
-        keys.forEach(k => {
-          const li = document.createElement('li');
-          li.innerHTML = `<a href="./${k}">${k}</a>`;
-          ul.appendChild(li);
-        });
-      }
-    }
-
-    function fmtESdate(d) {
-      return new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' }).format(d);
-    }
-    function atNoon(d){ const x=new Date(d); x.setHours(12,0,0,0); return x; }
-    function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+    // ----------------- Small helpers -----------------
+    const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
+    const fmtESdate = d => fmtES.format(d);
+    const atNoon = d => { const x=new Date(d); x.setHours(12,0,0,0); return x; };
+    const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+    const el = (tag, attrs={}, html='') => { const e=document.createElement(tag); for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v); if (html) e.innerHTML=html; return e; };
 
     function mostRecentServiceDay(refDate, USE_DAYS){
       const y = new Date(refDate);
@@ -130,13 +100,45 @@
       return (diff - 44000).toString();
     }
 
+    // ----------------- Renderers (no navigation) -----------------
+    function renderLanding() {
+      document.getElementById('title').textContent = 'B05 – Trazabilidad';
+      const app = document.getElementById('app');
+      app.innerHTML = '';
+      const box = el('div', {class:'card'});
+      const keys = Object.keys(CONFIGS);
+
+      box.innerHTML = `
+        <h3>Escanee un código QR del producto</h3>
+        <p>O abra una URL como <code>https://b05-sanidad.github.io/food/5HUM517</code></p>
+        <p style="margin:.5rem 0 0;"><strong>Claves disponibles en config.js:</strong></p>
+        <ul id="keys" style="margin:.5rem 0 0;"></ul>
+      `;
+      app.appendChild(box);
+
+      const ul = box.querySelector('#keys');
+      if (keys.length === 0) {
+        ul.innerHTML = `<li><em>No hay claves en config.js</em></li>`;
+      } else {
+        keys.forEach(k => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="/food/${k}">${k}</a>`;
+          ul.appendChild(li);
+        });
+      }
+
+      // Buttons still work
+      bindButtonsForLanding();
+    }
+
     function renderTraceability(cfg){
       const {
         Food, PREFIX, latestLotNumber, PRODUCTO, ORIGEN, LOTE, USADO, CHEF,
         EXP_DAYS, MONTHS_BACK, USE_DAYS
       } = cfg;
 
-      document.getElementById('title').textContent = `${Food} – Registro de Trazabilidad – B05`;
+      document.getElementById('title').textContent =
+        `${Food} – Registro de Trazabilidad – B05`;
 
       const app = document.getElementById('app');
       app.innerHTML = `
@@ -188,7 +190,6 @@
         </div>
       `;
 
-      // Generate data
       const latest = mostRecentServiceDay(new Date(), USE_DAYS);
       const exp    = addDays(latest, EXP_DAYS);
 
@@ -219,8 +220,18 @@
         tbody.appendChild(tr);
       });
 
-      // Button actions (bound after render)
-      document.getElementById('closeBtn').onclick  = () => location.href = './';
+      bindButtonsForDetails(Food);
+    }
+
+    function bindButtonsForLanding() {
+      document.getElementById('closeBtn').onclick = () => { /* stay here */ };
+      document.getElementById('printBtn').onclick = () => window.print();
+      document.getElementById('exportPdfBtn').onclick = () => window.print();
+      document.getElementById('exportCsvBtn').onclick = () => { /* nothing on landing */ };
+    }
+
+    function bindButtonsForDetails(Food) {
+      document.getElementById('closeBtn').onclick  = () => history.pushState({}, '', '/food/');
       document.getElementById('printBtn').onclick  = () => window.print();
       document.getElementById('exportPdfBtn').onclick = () => window.print();
       document.getElementById('exportCsvBtn').onclick = () => {
@@ -242,13 +253,11 @@
       };
     }
 
-    // -------- Decide what to show (no redirects = no loops) --------
-    if (!KEY || !CONFIG) {
-      // No key or invalid key: show landing screen (no redirect)
-      renderLanding();
-    } else {
-      // Valid key: render the traceability page
+    // --------- Decide what to render (no redirects -> no loops) ---------
+    if (CONFIG) {
       renderTraceability(CONFIG);
+    } else {
+      renderLanding();
     }
   </script>
 </body>
