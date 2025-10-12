@@ -36,8 +36,7 @@
   <header>
     <h1 id="title"></h1>
     <div>
-      <button id="regenBtn" class="btn btn-brand">🔄 Regenerar</button>
-      <button id="exportCsvBtn" class="btn">⬇️ Exportar CSV</button>
+<button id="closeBtn" class="btn btn-brand">❌ Close</button>      <button id="exportCsvBtn" class="btn">⬇️ Exportar CSV</button>
       <button id="printBtn" class="btn">🖨️ Imprimir</button>
       <button id="exportPdfBtn" class="btn">📄 Exportar PDF</button>
     </div>
@@ -185,8 +184,9 @@
   }
 
   // === Actions ===
-  document.getElementById('regenBtn').addEventListener('click', generate);
-  document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+document.getElementById('closeBtn').addEventListener('click', () => {
+  window.location.href = 'main.html';
+});  document.getElementById('printBtn').addEventListener('click', ()=> window.print());
   document.getElementById('exportPdfBtn').addEventListener('click', ()=> window.print());
 
 document.getElementById('exportCsvBtn').addEventListener('click', ()=> {
