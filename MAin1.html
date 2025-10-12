@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Trace HOM-1234</title>
+  <script>
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+    function calculateDates() {
+      const today = new Date();
+      let prepDate = new Date(today);
+      if (today.getDay() === 1) { // Monday=1
+        prepDate.setDate(today.getDate() - 2);
+      } else {
+        prepDate.setDate(today.getDate() - 1);
+      }
+      let expDate = new Date(prepDate);
+      expDate.setDate(prepDate.getDate() + 4);
+      document.getElementById("prepDate").textContent = formatDate(prepDate);
+      document.getElementById("expDate").textContent = formatDate(expDate);
+      document.getElementById("fechaDate").textContent = formatDate(prepDate);
+    }
+    window.onload = calculateDates;
+  </script>
+</head>
+<body>
+  <h2>Hummus: HOM-1234</h2>
+  <p>Fresh Hummus 🌞</p>
+  <ul>
+    <li>Preparation Date: <span id="prepDate"></span><br>
+      <small>(If today is Monday, it uses the previous Friday; otherwise, yesterday’s date.)</small>
+    </li>
+    <li>Exp Date: <span id="expDate"></span> (Preparation Date + 4 days)</li>
+    <li>Mantener: ≤ +4 °C</li>
+    <li>VALIDA: 5 Días</li>
+    <li>Tapperware: Stainless Steel, Frigo 1 Door 2</li>
+    <li>Fecha /date: <span id="fechaDate"></span></li>
+    <li>Producto / Ingredientes: Garbanzos cocidos 2.5 kg, Tahina 400 g, Limón 150 ml, Aceite 200 ml, Ajo 40 g</li>
+    <li>Origen / Proveedor: Makro / Oasis / Consum</li>
+    <li>Lote / Batch: Garbanzos L778 · Tahina L120</li>
+    <li>Usado en: HOMMUS</li>
+    <li>Preparado por: B05 Chef</li>
+    <li>Observaciones: Refrigerado a +4 °C – Vida útil 4 días</li>
+  </ul>
+</body>
+</html>

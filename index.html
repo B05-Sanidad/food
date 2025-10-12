@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Lot Number Lookup</title>
+  <script>
+    function redirect() {
+      var code = document.getElementById('letters').value.toUpperCase().trim();
+      var number = document.getElementById('numbers').value.trim();
+
+      // Your valid lot numbers here:
+      var validLots = ["1234", "5678", "8765", "4321"]; // EDIT this list!
+
+      // Validate 3-letter code
+      if (!["HOM","BER","SHC","SHP"].includes(code)) {
+        alert("Please enter 3 letters: HOM, BER, SHC, SHP.");
+        return false;
+      }
+      // Validate 4-digit lot number
+      if (!validLots.includes(number)) {
+        alert("Lot number doesn't exist.");
+        return false;
+      }
+
+      // Redirection logic with lot parameter
+      var lotParam = code + '-' + number;
+      if (code === "HOM") window.location.href = "tracehom.html?lot=" + encodeURIComponent(lotParam);
+      else if (code === "BER") window.location.href = "traceber.html?lot=" + encodeURIComponent(lotParam);
+      else if (code === "SHC") window.location.href = "traceshc.html?lot=" + encodeURIComponent(lotParam);
+      else if (code === "SHP") window.location.href = "traceshp.html?lot=" + encodeURIComponent(lotParam);
+    }
+  </script>
+</head>
+<body>
+  <form onsubmit="redirect(); return false;">
+    <label>3 Letters: <input id="letters" type="text" maxlength="3" required></label><br>
+    <label>4 Numbers: <input id="numbers" type="text" maxlength="4" required pattern="\d{4}"></label><br>
+    <button type="submit">Go</button>
+  </form>
+</body>
+</html>

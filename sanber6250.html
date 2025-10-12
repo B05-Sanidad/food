@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B05 – BERENJENA Traceability (Optimized)</title>
+  <style>
+    :root { --brand:#3A5C1E; --beige:#F1F1E6; }
+    html { font-size: 12px; }
+    body { background: var(--beige); margin: 0; font-family: Arial, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 1rem 1.5rem; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.06); display: flex; justify-content: space-between; align-items: center; gap:.75rem; flex-wrap: wrap; }
+    header h1 { color: var(--brand); margin: 0; font-weight: 800; font-size: 1.25rem; }
+    .btn { border-radius: .6rem; padding: .4rem .8rem; font-weight: 600; cursor: pointer; border: 1px solid #e5e7eb; background: #fff; }
+    .btn-brand { background: var(--brand); color: #fff; border-color: var(--brand); }
+    main { padding: 1rem 1.5rem 3rem; flex-grow: 1; }
+    .card { background: #fff; border-radius: 1rem; box-shadow: 0 8px 30px rgba(0,0,0,.06); max-width: 1100px; margin: 0 auto; padding: 1rem; overflow-x: auto; }
+    h3 { margin: .5rem 0; color:#334155; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .85rem; margin-top: .5rem; }
+    th, td { padding: .6rem .75rem; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    th { position: sticky; top: 0; background: #fafafa; font-weight: 700; color: #475569; }
+    .nowrap { white-space: nowrap; }
+    @media print {
+      header { display:none !important; }
+      main { padding: 0; }
+      .card { box-shadow: none; margin: 0; padding: 0; }
+      th { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BERENJENA – Registro de Trazabilidad – B05</h1>
+    <div>
+      <button id="regenBtn" class="btn btn-brand">🔄 Regenerar</button>
+      <button id="exportCsvBtn" class="btn">⬇️ Exportar CSV</button>
+      <button id="printBtn" class="btn">🖨️ Imprimir</button>
+      <button id="exportPdfBtn" class="btn">📄 Exportar PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h3>Lote más reciente</h3>
+      <table aria-label="Último lote">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Caducidad</th>
+            <th>Lote #</th>
+            <th>Producto / Ingredientes</th>
+            <th>Origen / Proveedor</th>
+            <th>Lotes de materias</th>
+            <th>Usado en</th>
+            <th>Preparado por</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="nowrap" id="latestLotDate"></td>
+            <td class="nowrap" id="latestExpDate"></td>
+             <td class="nowrap"> 11-BER-250</td>
+            <td>Berenjena asada, tahini, limón, ajo, aceite de oliva, sal</td>
+            <td>Makro / Oasis / Consum</td>
+            <td>Berenjena Oasis, Tahini L120, Aceite L221</td>
+            <td>Berenjena</td>
+            <td> B05 Chef</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Histórico</h3>
+      <table aria-label="Histórico de lotes">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Caducidad</th>
+            <th>Lote #</th>
+            <th>Producto / Ingredientes</th>
+            <th>Origen / Proveedor</th>
+            <th>Lotes de materias</th>
+            <th>Usado en</th>
+            <th>Preparado por</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    // === Config ===
+    const PRODUCTO = "Berenjena asada, tahini, limón, ajo, aceite de oliva, sal";
+    const ORIGEN   = "Makro / Oasis / Consum";
+    const LOTE     = "Berenjena Oasis, Tahini L120, Aceite L221";
+    const USADO    = "Berenjena";
+    const CHEF     = "Chef B05";
+    const EXP_DAYS = 5;       // D+5 caducidad
+    const MONTHS_BACK = 6;    // histórico 6 meses
+    const USE_DAYS = [3, 6];  // Mercredi (3) y Samedi (6)
+
+    const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
+    function atNoon(d){ const x=new Date(d); x.setHours(12,0,0,0); return x; }
+    function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+
+    function mostRecentServiceDay(refDate){
+      // Return the most recent Tue/Fri on or before yesterday.
+      const y = new Date(refDate);
+      y.setDate(y.getDate()-1); // yesterday
+      while(!USE_DAYS.includes(y.getDay())){
+        y.setDate(y.getDate()-1);
+      }
+      return atNoon(y);
+    }
+
+    function buildDateSeries(latest){
+      // Build descending series of Tue/Fri dates for the last 6 months ending before 'latest'
+      const start = atNoon(new Date(latest)); start.setMonth(start.getMonth()-MONTHS_BACK);
+      const dates = [];
+      const d = new Date(latest);
+      d.setDate(d.getDate()-1);
+      for(let cur=new Date(d); cur>=start; cur.setDate(cur.getDate()-1)){
+        if(USE_DAYS.includes(cur.getDay())) dates.push(atNoon(new Date(cur)));
+      }
+      return dates;
+    }
+
+    function generate(){
+      const latest = mostRecentServiceDay(new Date());
+      const exp    = addDays(latest, EXP_DAYS);
+      document.getElementById('latestLotDate').textContent = fmtES.format(latest);
+      document.getElementById('latestExpDate').textContent  = fmtES.format(exp);
+
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+
+      const series = buildDateSeries(latest);
+      series.forEach(dateObj => {
+        const tr = document.createElement('tr');
+        const expDate = addDays(dateObj, EXP_DAYS);
+        tr.innerHTML = `
+          <td class="nowrap">${fmtES.format(dateObj)}</td>
+          <td class="nowrap">${fmtES.format(expDate)}</td>
+          <td class="nowrap">11-BER-${serialForDate(dateObj)}</td>
+          <td>${PRODUCTO}</td>
+          <td>${ORIGEN}</td>
+          <td>${LOTE}</td>
+          <td>${USADO}</td>
+          <td>${CHEF}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Serial derivado de fecha (estable, legible)
+    function serialForDate(dateObj){
+      // Base Numbers (1904-01-01) compatible, with small reduction to keep codes short
+      const base = new Date(1904,0,1);
+      const diff = Math.floor((dateObj - base) / (1000*60*60*24)) + 1;
+      return (diff - 44000).toString();
+    }
+
+    // === Actions ===
+    document.getElementById('regenBtn').addEventListener('click', generate);
+    document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+    document.getElementById('exportPdfBtn').addEventListener('click', ()=> window.print());
+
+    document.getElementById('exportCsvBtn').addEventListener('click', ()=> {
+      const table = document.querySelector('table[aria-label="Histórico de lotes"] tbody');
+      const rows = [["Date","Expiration Date","Lot #","Product / Ingredients","Origin / Supplier","Lot / Batch","Used in","Prepared by"]];
+      [...table.querySelectorAll('tr')].forEach(tr=>{
+        const cells = [...tr.children].map(td => '"'+ (td.textContent||'').replaceAll('"','""') +'"');
+        rows.push(cells);
+      });
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'B05_traceability_Berenjena_6m_optimized.csv'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Init
+    generate();
+  </script>
+</body>
+</html>

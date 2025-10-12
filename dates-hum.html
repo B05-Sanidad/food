@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B05 – Trazabilidad Dinámica (6 meses)</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.4/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    :root{--brand:#3A5C1E;--beige:#F1F1E6}
+    body{background:var(--beige)}
+    .card{background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.06)}
+    .brand{color:var(--brand)}
+    table{border-collapse:separate;border-spacing:0}
+    th{position:sticky;top:0;background:#fafafa}
+    .btn{border-radius:12px;padding:.6rem 1rem;font-weight:600}
+    .btn-brand{background:var(--brand);color:#fff}
+    .btn-ghost{background:#fff;border:1px solid #e5e7eb}
+  </style>
+</head>
+<body class="min-h-screen">
+  <header class="px-4 md:px-8 py-6">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-extrabold brand">B05 – Trazabilidad Dinámica (Generador 6 meses)</h1>
+        <p class="text-sm text-slate-600">APPCC • Fechas cada 5 días, <b>sin lunes</b>, desde hoy hasta hace 6 meses. Solo cambia la <b>Fecha</b>; los demás campos son fijos para Hommos.</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="exportCsvBtn" class="btn btn-ghost">⬇️ Exportar CSV</button>
+        <button id="printBtn" class="btn btn-ghost">🖨️ Imprimir</button>
+        <button id="regenBtn" class="btn btn-brand">🔄 Regenerar</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-4 md:px-8 pb-16">
+    <div class="max-w-6xl mx-auto card p-5">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Intervalo (días)</label>
+          <input id="intervalDays" type="number" min="1" value="5" class="w-full rounded-lg border border-slate-300 p-2" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Meses atrás</label>
+          <input id="monthsBack" type="number" min="1" value="6" class="w-full rounded-lg border border-slate-300 p-2" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Excluir lunes</label>
+          <select id="excludeMondays" class="w-full rounded-lg border border-slate-300 p-2">
+            <option value="true" selected>Sí (recomendado)</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-500 mb-1">Fecha fin (hoy por defecto)</label>
+          <input id="endDate" type="date" class="w-full rounded-lg border border-slate-300 p-2" />
+        </div>
+      </div>
+
+      <div class="overflow-auto max-h-[70vh] border rounded-xl">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-slate-700">
+              <th class="p-3">Fecha</th>
+              <th class="p-3">Producto / Ingredientes</th>
+              <th class="p-3">Origen / Proveedor</th>
+              <th class="p-3">Lote / Batch</th>
+              <th class="p-3">Usado en</th>
+              <th class="p-3">Preparado por</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Fixed fields for Hommos (as requested)
+    const PRODUCTO = "Garbanzos cocidos 2.5 kg, Tahina 400 g, Zumo de limón 150 ml, Aceite de oliva 200 ml, Ajo 40 g, Sal 20 g";
+    const ORIGEN = "Makro / Dialsur";
+    const LOTE   = "Garbanzos L778, Tahina L120, Aceite L221";
+    const USADO  = "Hummus";
+    const CHEF   = "Chef B05";
+
+    const tbody = document.getElementById('tbody');
+    const intervalEl = document.getElementById('intervalDays');
+    const monthsBackEl = document.getElementById('monthsBack');
+    const excludeMondaysEl = document.getElementById('excludeMondays');
+    const endDateEl = document.getElementById('endDate');
+
+    // Helpers
+    const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
+    function atNoon(d){ const x=new Date(d); x.setHours(12,0,0,0); return x; }
+    function addDays(d, n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+
+    function generate(){
+      tbody.innerHTML = '';
+      const interval = Math.max(1, parseInt(intervalEl.value||5,10));
+      const monthsBack = Math.max(1, parseInt(monthsBackEl.value||6,10));
+      const excludeMondays = (excludeMondaysEl.value === 'true');
+
+      const today = atNoon(endDateEl.value ? new Date(endDateEl.value) : new Date());
+      const start = atNoon(new Date(today));
+      start.setMonth(start.getMonth() - monthsBack);
+
+      let d = new Date(start);
+      while(d <= today){
+        // JS: 0=Domingo, 1=Lunes ... 6=Sábado
+        if(!(excludeMondays && d.getDay() === 1)){
+          const tr = document.createElement('tr');
+          tr.className = 'border-t';
+          const fecha = fmtES.format(d);
+          tr.innerHTML = `
+            <td class="p-3 whitespace-nowrap">${fecha}</td>
+            <td class="p-3">${PRODUCTO}</td>
+            <td class="p-3">${ORIGEN}</td>
+            <td class="p-3">${LOTE}</td>
+            <td class="p-3">${USADO}</td>
+            <td class="p-3">${CHEF}</td>`;
+          tbody.appendChild(tr);
+        }
+        d = addDays(d, interval);
+      }
+    }
+
+    // Export CSV
+    document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+      const rows = [["Fecha","Producto / Ingredientes","Origen / Proveedor","Lote / Batch","Usado en","Preparado por"]];
+      [...tbody.querySelectorAll('tr')].forEach(tr=>{
+        const cells = [...tr.children].map(td => '"'+ (td.textContent||'').replaceAll('"','""') +'"');
+        rows.push(cells);
+      });
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'B05_trazabilidad_hommos_6m.csv'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Print
+    document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+
+    // Regenerate on changes
+    ['change','input'].forEach(ev=>{
+      intervalEl.addEventListener(ev, generate);
+      monthsBackEl.addEventListener(ev, generate);
+      excludeMondaysEl.addEventListener(ev, generate);
+      endDateEl.addEventListener(ev, generate);
+    });
+
+    // Manual regenerate button
+    document.getElementById('regenBtn').addEventListener('click', generate);
+
+    // First run
+    generate();
+  </script>
+</body>
+</html>

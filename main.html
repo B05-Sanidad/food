@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B05 – Hummus · Registro de Trazabilidad (6 meses)</title>
+  <style>
+    :root { --brand:#3A5C1E; --beige:#F1F1E6; --ink:#475569; --line:#e2e8f0; }
+    html { font-size:12px; }
+    body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:var(--beige); font-family:Arial, Helvetica, sans-serif; color:var(--ink); }
+    header { padding:1.25rem 2rem; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.08); display:flex; justify-content:space-between; align-items:center; gap:.75rem; flex-wrap:wrap; }
+    header h1 { margin:0; color:var(--brand); font-weight:800; font-size:1.4rem; }
+    .btn { border:1px solid #e5e7eb; background:#fff; border-radius:.75rem; padding:.45rem .9rem; font-weight:600; cursor:pointer; user-select:none; font-size:.9rem; }
+    .btn-brand { background:var(--brand); color:#fff; border-color:transparent; }
+    main { flex:1; padding:1rem 2rem 3rem; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 8px 30px rgba(0,0,0,.06); max-width:1200px; margin:0 auto; padding:1rem; overflow-x:auto; }
+    h3 { margin:.25rem 0 0; font-size:1rem; }
+    table { width:100%; border-collapse:separate; border-spacing:0; font-size:.8rem; margin-top:.75rem; }
+    th, td { padding:.7rem .75rem; text-align:left; border-bottom:1px solid var(--line); vertical-align:top; }
+    thead th { position:sticky; top:0; background:#fafafa; font-weight:700; color:#374151; z-index:1; }
+    .mono { font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+    #testOutput { white-space:pre-wrap; background:rgba(255,255,255,.6); border:1px solid #cbd5e1; border-radius:.75rem; padding:.6rem .75rem; margin-top:1rem; font-size:.75rem; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; max-height:180px; overflow:auto; }
+    @media print { header, #exportCsvBtn, #printBtn, #exportPdfBtn, #regenBtn, #testOutput { display:none !important; } main{ padding:0 } .card{ box-shadow:none; padding:0 } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>HUMMUS – Registro de Trazabilidad (B05)</h1>
+      <p style="margin:0; font-size:.75rem; color:#64748b">Últimos 6 meses · Lunes excluidos · Último lote fijo HUM‑7017 (fecha = hoy − 1 ajustada).</p>
+    </div>
+    <div>
+      <button id="exportCsvBtn" class="btn">⬇️ Exportar CSV</button>
+      <button id="printBtn" class="btn">🖨️ Imprimir</button>
+      <button id="exportPdfBtn" class="btn">📄 Exportar PDF</button>
+      <button id="regenBtn" class="btn btn-brand">🔄 Regenerar</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h3>Último lote</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Caducidad</th>
+            <th>Nº de lote</th>
+            <th>Producto / Ingredientes</th>
+            <th>Origen / Proveedor</th>
+            <th>Lote / Batch</th>
+            <th>Usado en</th>
+            <th>Preparado por</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span id="latestLotDate"></span></td>
+            <td><span id="latestExpDate"></span></td>
+            <td class="mono"><span id="latestLotNumber">HUM-7017</span></td>
+            <td>Garbanzos cocidos 2.5 kg, Tahina 500 g, Zumo de limón 150 ml, Aceite de oliva 200 ml, Ajo 40 g, Sal 20 g</td>
+            <td>Makro / Oasis / Consum</td>
+            <td>Garbanzos L778, Tahina L120, Aceite L221</td>
+            <td>Hummus</td>
+            <td>Chef B05</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:1rem">Histórico</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Caducidad</th>
+            <th>Nº de lote</th>
+            <th>Producto / Ingredientes</th>
+            <th>Origen / Proveedor</th>
+            <th>Lote / Batch</th>
+            <th>Usado en</th>
+            <th>Preparado por</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+
+      <div id="testOutput" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <script>
+  'use strict';
+  // ===== Config (constantes fijas) =====
+  const PRODUCTO = 'Garbanzos cocidos, Tahina, Zumo de limón, Aceite de oliva, Ajo, Sal';
+  const ORIGEN   = 'Makro / Oasis / Consum';
+  const LOTE     = 'Garbanzos L778, Tahina L120, Aceite L221';
+  const USADO    = 'Hummus';
+  const CHEF     = 'Chef B05';
+  const MONTHS_BACK = 6;          // últimos 6 meses
+  const EXCLUDE_MONDAYS = true;   // sin lunes
+
+  // ===== Utilidades =====
+  const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const $ = id => document.getElementById(id);
+  const atNoon = d => { const x = new Date(d); x.setHours(12,0,0,0); return x; };
+  const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+  const isMonday = d => d.getDay() === 1;
+
+  function latestBusinessDate(){
+    let t = new Date();
+    t.setDate(t.getDate()-1); // hoy - 1
+    if (EXCLUDE_MONDAYS) { while (isMonday(t)) t.setDate(t.getDate()-1); }
+    return atNoon(t);
+  }
+
+  function buildHistoryDates(endDate){
+    const start = atNoon(new Date(endDate));
+    start.setMonth(start.getMonth() - MONTHS_BACK);
+    const out = [];
+    for (let d = new Date(start); d < endDate; d = addDays(d, 1)) {
+      const dow = d.getDay();
+      if (dow === 2 || dow === 5) out.push(new Date(d)); // Mar/Vie para cadencia estable sin lunes
+    }
+    return out.sort((a,b)=> b-a); // más recientes primero
+  }
+
+  function renderLatest(date){
+    $('latestLotDate').textContent = fmtES.format(date);
+    $('latestExpDate').textContent = fmtES.format(addDays(date, 4));
+    // Nº de lote del último = HUM-7017 (fijo en HTML)
+  }
+
+  function renderHistory(dates){
+    const tbody = $('tbody');
+    tbody.innerHTML = '';
+    const now = new Date();
+    dates.forEach(dt => {
+      const exp = addDays(dt, 4);
+      if (now < exp) return; // sólo históricos (ya caducados)
+      const lot = 'HUM-' + String(1 + Math.floor(Math.random()*9999)).padStart(4,'0');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${fmtES.format(dt)}</td>
+        <td>${fmtES.format(exp)}</td>
+        <td class="mono">${lot}</td>
+        <td>${PRODUCTO}</td>
+        <td>${ORIGEN}</td>
+        <td>${LOTE}</td>
+        <td>${USADO}</td>
+        <td>${CHEF}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function exportCsv(){
+    const rows = [[
+      'Fecha','Caducidad','Nº de lote','Producto / Ingredientes','Origen / Proveedor','Lote / Batch','Usado en','Preparado por'
+    ]];
+    [...$('tbody').querySelectorAll('tr')].forEach(tr => {
+      const cells = [...tr.children].map(td => '"' + (td.textContent||'').replaceAll('"','""') + '"');
+      rows.push(cells);
+    });
+    const csv = rows.map(r=>r.join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'B05_trazabilidad_hummus_6m.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ===== Comprobaciones (no modifican datos) =====
+  function runTests(){
+    const out = [];
+    const lastLotFixed = $('latestLotNumber').textContent.trim();
+    out.push(lastLotFixed === 'HUM-7017' ? '✅ Último lote = HUM-7017' : `❌ Último lote es ${lastLotFixed}`);
+    // Fecha esperada = hoy-1 ajustada sin lunes
+    let expected = new Date(); expected.setDate(expected.getDate()-1); while (isMonday(expected)) expected.setDate(expected.getDate()-1);
+    const expectedStr = fmtES.format(expected);
+    const latestStr = $('latestLotDate').textContent.trim();
+    out.push(latestStr === expectedStr ? '✅ Última fecha = hoy−1 (sin lunes)' : `❌ Última fecha ${latestStr} ≠ ${expectedStr}`);
+    // Histórico: sin lunes, formato de lote y orden
+    const rows = [...$('tbody').querySelectorAll('tr')];
+    const anyMonday = rows.some(tr => {
+      const [dd,mm,yy] = tr.children[0].textContent.split('/').map(Number);
+      return new Date(yy, mm-1, dd).getDay() === 1;
+    });
+    out.push(!anyMonday ? '✅ Histórico sin lunes' : '❌ Histórico contiene lunes');
+    const badLots = rows.filter(tr => !/^HUM-\d{4}$/.test(tr.children[2].textContent.trim()));
+    out.push(badLots.length === 0 ? '✅ Lotes formato HUM-####' : `❌ ${badLots.length} lote(s) con formato incorrecto`);
+    const descOk = rows.every((tr,i,arr)=> i===0 || new Date(arr[i-1].children[0].textContent.split('/').reverse().join('-')) >= new Date(tr.children[0].textContent.split('/').reverse().join('-')));
+    out.push(descOk ? '✅ Fechas en orden descendente' : '❌ Fechas no descendentes');
+    $('testOutput').textContent = out.join('\n');
+  }
+
+  function regenerate(){
+    const latest = latestBusinessDate();
+    renderLatest(latest);
+    const dates = buildHistoryDates(latest);
+    renderHistory(dates);
+    runTests();
+  }
+
+  $('exportCsvBtn').addEventListener('click', exportCsv);
+  $('printBtn').addEventListener('click', ()=> window.print());
+  $('exportPdfBtn').addEventListener('click', ()=> window.print());
+  $('regenBtn').addEventListener('click', regenerate);
+
+  // Inicio
+  regenerate();
+  </script>
+</body>
+</html>
