@@ -1,4 +1,4 @@
-// /food/config.js  (PURE DATA — no URL logic, no redirects)
+// /food/config.js  (pure data only)
 window.B05_CONFIGS = {
   "5HUM517": {
     Food: "HOMMUS",
@@ -9,9 +9,7 @@ window.B05_CONFIGS = {
     LOTE: "Garbanzos L778, Tahini L120, Aceite L221",
     USADO: "Hummus",
     CHEF: "Chef B05",
-    EXP_DAYS: 4,
-    MONTHS_BACK: 6,
-    USE_DAYS: [2, 5]
+    EXP_DAYS: 4, MONTHS_BACK: 6, USE_DAYS: [2, 5]
   },
 
   "11BER610": {
@@ -23,9 +21,7 @@ window.B05_CONFIGS = {
     LOTE: "Berenjena L610, Tahini L130",
     USADO: "Baba Ghanoush",
     CHEF: "Chef B05",
-    EXP_DAYS: 5,
-    MONTHS_BACK: 6,
-    USE_DAYS: [2, 5]
+    EXP_DAYS: 5, MONTHS_BACK: 6, USE_DAYS: [2, 5]
   },
 
   "29MUH430": {
@@ -37,8 +33,6 @@ window.B05_CONFIGS = {
     LOTE: "Pimiento L430, Nueces L221",
     USADO: "Mezze",
     CHEF: "Chef B05",
-    EXP_DAYS: 10,
-    MONTHS_BACK: 6,
-    USE_DAYS: [1]
+    EXP_DAYS: 10, MONTHS_BACK: 6, USE_DAYS: [1]
   }
 };
