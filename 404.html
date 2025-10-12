@@ -248,10 +248,11 @@
       if (!body) return;
       const rows = [["Date","Expiration Date","Lot #","Product / Ingredients","Origin / Supplier","Lot / Batch","Used in","Prepared by"]];
       [...body.querySelectorAll('tr')].forEach(tr=>{
-        const cells = [...tr.children].map(td => '"'+ (td.textContent||'').replaceAll('"','""') +'"');
+        const cells = [...tr.children].map(td => '"' + (td.textContent||'').replaceAll('"','""') + '"');
         rows.push(cells);
       });
-      const csv = rows.map(r=>r.join(',')).join('\n');
+      const csv = rows.map(r=>r.join(',')).join('
+');
       const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
