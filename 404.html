@@ -24,11 +24,6 @@
     code{background:#f1f5f9;padding:0 .25rem;border-radius:.25rem;}
     @media print{header{display:none!important;}main{padding:0;}.card{box-shadow:none;margin:0;padding:0;}th{position:static;}}
   </style>
-
-  <!-- Always load the latest config.js (cache-buster) -->
-  <script>
-    document.write('<script src="/food/config.js?v=' + Date.now() + '"><\/script>');
-  </script>
 </head>
 <body>
   <header>
@@ -53,10 +48,6 @@
       if (['', 'FOOD', '404', '404.HTML', 'INDEX.HTML'].includes(key)) key = '';
       return key;
     }
-
-    const CONFIGS = window.B05_CONFIGS || {};
-    const KEY = getKeyFromUrl();
-    const CONFIG = KEY ? CONFIGS[KEY] : null;
 
     // --- Helpers ---
     const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
@@ -218,48 +209,65 @@
       });
     }
 
-    // --- Render flow ---
-    try {
-      const keys = Object.keys(CONFIGS);
-      if (!keys.length) {
-        renderError('No se pudo cargar config.js',
-          `<p>Revise que <code>/food/config.js</code> existe y no tenga errores de sintaxis.</p>
-           <p>Fuerce refresco: <code>Ctrl+F5</code> (Windows) o <code>⌘⇧R</code> (Mac).</p>`);
-      } else if (!KEY) {
-        renderLanding(keys);
-      } else if (!CONFIG) {
-        renderError('Clave no encontrada',
-          `<p>No existe la clave <code>${KEY}</code> en <code>config.js</code>.</p>
-           <p>Claves disponibles: <code>${keys.join(', ')}</code></p>`);
-      } else {
-        renderTraceability(CONFIG);
+    // --- Boot after config.js loads ---
+    function boot() {
+      const CONFIGS = window.B05_CONFIGS || {};
+      const KEY = getKeyFromUrl();
+      const CONFIG = KEY ? CONFIGS[KEY] : null;
+
+      try {
+        const keys = Object.keys(CONFIGS);
+        if (!keys.length) {
+          renderError('No se pudo cargar config.js',
+            `<p>Revise que <code>/food/config.js</code> existe y no tenga errores de sintaxis.</p>
+             <p>Fuerce refresco: <code>Ctrl+F5</code> (Windows) o <code>⌘⇧R</code> (Mac).</p>`);
+        } else if (!KEY) {
+          renderLanding(keys);
+        } else if (!CONFIG) {
+          renderError('Clave no encontrada',
+            `<p>No existe la clave <code>${KEY}</code> en <code>config.js</code>.</p>
+             <p>Claves disponibles: <code>${keys.join(', ')}</code></p>`);
+        } else {
+          renderTraceability(CONFIG);
+        }
+      } catch (e) {
+        renderError('Error de ejecución', `<pre>${(e && e.stack) || e}</pre>`);
+        console.error(e);
       }
-    } catch (e) {
-      renderError('Error de ejecución', `<pre>${(e && e.stack) || e}</pre>`);
-      console.error(e);
+
+      // Buttons
+      document.getElementById('closeBtn').onclick = () => history.pushState({}, '', '/food/');
+      document.getElementById('printBtn').onclick = () => window.print();
+      document.getElementById('exportPdfBtn').onclick = () => window.print();
+      document.getElementById('exportCsvBtn').onclick = () => {
+        const body = document.querySelector('table[aria-label="Histórico de lotes"] tbody');
+        if (!body) return;
+        const rows = [["Date","Expiration Date","Lot #","Product / Ingredients","Origin / Supplier","Lot / Batch","Used in","Prepared by"]];
+        [...body.querySelectorAll('tr')].forEach(tr=>{
+          const cells = [...tr.children].map(td => '"' + (td.textContent||'').replaceAll('"','""') + '"');
+          rows.push(cells);
+        });
+        const csv = rows.map(r=>r.join(',')).join('\n');
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const safeName = (document.getElementById('title').textContent || 'producto').toLowerCase().replaceAll(' ', '_');
+        a.href = url; a.download = `B05_traceability_${safeName}_6m.csv`; a.click();
+        URL.revokeObjectURL(url);
+      };
     }
 
-    // Buttons (stay on page)
-    document.getElementById('closeBtn').onclick = () => history.pushState({}, '', '/food/');
-    document.getElementById('printBtn').onclick = () => window.print();
-    document.getElementById('exportPdfBtn').onclick = () => window.print();
-    document.getElementById('exportCsvBtn').onclick = () => {
-      const body = document.querySelector('table[aria-label="Histórico de lotes"] tbody');
-      if (!body) return;
-      const rows = [["Date","Expiration Date","Lot #","Product / Ingredients","Origin / Supplier","Lot / Batch","Used in","Prepared by"]];
-      [...body.querySelectorAll('tr')].forEach(tr=>{
-        const cells = [...tr.children].map(td => '"' + (td.textContent||'').replaceAll('"','""') + '"');
-        rows.push(cells);
-      });
-      const csv = rows.map(r=>r.join(',')).join('
-');
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const safeName = (document.getElementById('title').textContent || 'producto').toLowerCase().replaceAll(' ', '_');
-      a.href = url; a.download = `B05_traceability_${safeName}_6m.csv`; a.click();
-      URL.revokeObjectURL(url);
-    };
+    // Dynamically load config.js and then boot
+    (function(){
+      const s = document.createElement('script');
+      s.src = '/food/config.js?v=' + Date.now();
+      s.onload = boot;
+      s.onerror = function(){
+        renderError('No se pudo cargar config.js',
+          '<p>Compruebe la ruta <code>/food/config.js</code> y que el archivo es válido.</p>');
+      };
+      document.head.appendChild(s);
+    })();
   </script>
 </body>
 </html>
