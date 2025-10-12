@@ -11,7 +11,6 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 4,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 4,
     USE_DAYS: [2, 5]
   },
 
@@ -26,7 +25,6 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 7,
     USE_DAYS: [2, 5]
   },
 
@@ -41,7 +39,6 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 180,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 20,
     USE_DAYS: [14]
   },
 
@@ -56,7 +53,6 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 10,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 15,
     USE_DAYS: [1]
   },
 
@@ -71,7 +67,6 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 10,
     USE_DAYS: [2, 5]
   }
 };
