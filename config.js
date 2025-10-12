@@ -34,7 +34,7 @@ window.B05_CONFIGS = {
     USADO: "Mezze",
     CHEF: "Chef B05",
     EXP_DAYS: 10, MONTHS_BACK: 6, USE_DAYS: [1]
-  }
+  },
 
   "13HOJ654": {
     Food: "HOJAS DE PARRA",
