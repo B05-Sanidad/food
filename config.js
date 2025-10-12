@@ -1,4 +1,20 @@
 // config.js
+const parts = location.pathname.split('/').filter(Boolean);
+let keyFromPath = (parts[parts.length - 1] || '').toUpperCase();
+
+// If GitHub Pages is serving 404.html, don't treat "404" as a product key
+if (keyFromPath === '404' || keyFromPath === '404.HTML') {
+  keyFromPath = '';
+}
+
+const keyFromQuery = new URLSearchParams(location.search).get('item')?.toUpperCase();
+const KEY = keyFromQuery || keyFromPath;
+const CONFIG = (window.B05_CONFIGS || {})[KEY];
+
+if (!CONFIG) {
+  // fall back gracefully
+  location.replace('./');  // or show a nicer message if you prefer
+}
 window.B05_CONFIGS = {
     "5HUM517": {
     Food: "HOMMUS",
@@ -41,4 +57,5 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     USE_DAYS: [1] // Lunes 
   }
+  
 };
