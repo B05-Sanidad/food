@@ -25,7 +25,10 @@
     @media print{header{display:none!important;}main{padding:0;}.card{box-shadow:none;margin:0;padding:0;}th{position:static;}}
   </style>
   <!-- ABSOLUTE path + cache buster so the newest config.js always loads -->
-  <script src="/food/config.js?v=2025-10-12-4"></script>
+  <script>
+  // Always load a fresh copy of config.js
+  document.write('<script src="/food/config.js?v=' + Date.now() + '"><\/script>');
+</script>
 </head>
 <body>
   <header>
