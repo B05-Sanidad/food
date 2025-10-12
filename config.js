@@ -1,4 +1,16 @@
 // /food/config.js  — PURE DATA (no logic, no redirects)
+/*
+  HOW TO ADD A NEW PRODUCT
+  ------------------------
+  1) Copy one of the blocks below and change the key (e.g., "99NEW123")
+  2) Fill in the fields. The most important ones are:
+       - Food, PREFIX, latestLotNumber, PRODUCTO, ORIGEN, LOTE, USADO, CHEF
+       - EXP_DAYS: days until expiry
+       - MONTHS_BACK: history length in months
+       - DAYS_PRODUCTION: cadence in days between lots (e.g. 7, 14, 20)
+       - PROD_ANCHOR: "YYYY-MM-DD" to align the cadence
+  3) Save the file and hard-refresh the browser.
+*/
 window.B05_CONFIGS = {
   "5HUM517": {
     Food: "HOMMUS",
@@ -11,7 +23,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 7,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 10,
+    DAYS_PRODUCTION: 7,
     PROD_ANCHOR: "2025-10-01"
   },
 
@@ -26,7 +38,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 20,
+    DAYS_PRODUCTION: 10,
     PROD_ANCHOR: "2025-09-10"
   },
 
@@ -41,7 +53,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 10,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 30,
+    DAYS_PRODUCTION: 14,
     PROD_ANCHOR: "2025-08-15"
   },
 
@@ -56,7 +68,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 12,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 40,
+    DAYS_PRODUCTION: 20,
     PROD_ANCHOR: "2025-07-25"
   },
 
@@ -71,7 +83,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 50,
+    DAYS_PRODUCTION: 20,
     PROD_ANCHOR: "2025-09-01"
   },
 
@@ -86,7 +98,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 4,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 60,
+    DAYS_PRODUCTION: 4,
     PROD_ANCHOR: "2025-10-10"
   },
 
@@ -101,7 +113,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 4,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 90,
+    DAYS_PRODUCTION: 4,
     PROD_ANCHOR: "2025-10-10"
   }
 };
