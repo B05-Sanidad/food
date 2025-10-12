@@ -7,28 +7,26 @@
   <style>
     :root { --brand:#3A5C1E; --beige:#F1F1E6; }
     html { font-size:12px; }
-    body { background:var(--beige); margin:0; font-family:Arial, sans-serif;
-           min-height:100vh; display:flex; flex-direction:column; }
-    header{padding:1rem 1.5rem;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);
-           display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+    body { background:var(--beige); margin:0; font-family:Arial, sans-serif; min-height:100vh; display:flex; flex-direction:column; }
+    header{padding:1rem 1.5rem;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
     header h1{color:var(--brand);margin:0;font-weight:800;font-size:1.25rem;}
-    .btn{border-radius:.6rem;padding:.4rem .8rem;font-weight:600;cursor:pointer;
-         border:1px solid #e5e7eb;background:#fff;}
+    .btn{border-radius:.6rem;padding:.4rem .8rem;font-weight:600;cursor:pointer;border:1px solid #e5e7eb;background:#fff;}
     .btn-brand{background:var(--brand);color:#fff;border-color:var(--brand);}
     main{padding:1rem 1.5rem 3rem;flex-grow:1;}
-    .card{background:#fff;border-radius:1rem;box-shadow:0 8px 30px rgba(0,0,0,.06);
-          max-width:1100px;margin:0 auto;padding:1rem;overflow-x:auto;}
+    .card{background:#fff;border-radius:1rem;box-shadow:0 8px 30px rgba(0,0,0,.06);max-width:1100px;margin:0 auto;padding:1rem;overflow-x:auto;}
     h3{margin:.5rem 0;color:#334155;}
     table{width:100%;border-collapse:separate;border-spacing:0;font-size:.85rem;margin-top:.5rem;}
     th,td{padding:.6rem .75rem;text-align:left;border-bottom:1px solid #e2e8f0;vertical-align:top;}
     th{position:sticky;top:0;background:#fafafa;font-weight:700;color:#475569;}
     .nowrap{white-space:nowrap;}
     #latestLotDate,#latestExpDate{color:red;font-weight:600;}
-    @media print{header{display:none!important;}main{padding:0;}
-      .card{box-shadow:none;margin:0;padding:0;}th{position:static;}}
+    .error{max-width:900px;margin:2rem auto;padding:1rem 1.25rem;border:1px solid #fecaca;background:#fff1f2;color:#7f1d1d;border-radius:.75rem;font-family:Arial;}
+    code{background:#f1f5f9;padding:0 .25rem;border-radius:.25rem;}
+    @media print{header{display:none!important;}main{padding:0;}.card{box-shadow:none;margin:0;padding:0;}th{position:static;}}
   </style>
-  <!-- ABSOLUTE path so it loads whether served via /food/index.html or /404.html -->
-<script src="/food/config.js?v=2025-10-12-3"></script></head>
+  <!-- ABSOLUTE path + cache buster so the newest config.js always loads -->
+  <script src="/food/config.js?v=2025-10-12-4"></script>
+</head>
 <body>
   <header>
     <h1 id="title">B05 – Trazabilidad</h1>
@@ -40,57 +38,40 @@
     </div>
   </header>
 
-  <main id="app">
-    <!-- We render either the landing or the traceability tables here -->
-  </main>
+  <main id="app"></main>
 
   <script>
-    // -------------- Robust key detection (no redirects) -----------------
-    // Example paths:
-    //   /food/                -> no key
-    //   /food/5HUM517         -> key=5HUM517
-    //   /food/404             -> not a key (landing)
-    //   /404.html (site 404)  -> still shows landing (no key)
-    const parts = location.pathname.replace(/\/+/g, '/').split('/').filter(Boolean);
-    // On GitHub Pages project /food/, the repo root is parts[0] === 'food'
-    const repoRoot = parts[0] === 'food' ? 'food' : parts[0] || '';
-    let keyFromPath = (parts.length >= 2 && parts[0] === 'food') ? parts[1].toUpperCase() : '';
-
-
-    if (keyFromPath === 'FOOD' || keyFromPath === '404' || keyFromPath === '404.HTML' || keyFromPath === 'INDEX.HTML') {
-      keyFromPath = '';
+    // ---------- Safe key detection (no redirects) ----------
+    function getKeyFromUrl() {
+      const parts = location.pathname.replace(/\/+/g,'/').split('/').filter(Boolean);
+      const keyFromPath = (parts[0]==='food' && parts.length>=2) ? (parts[1]||'').toUpperCase() : '';
+      const keyFromQuery = new URLSearchParams(location.search).get('item')?.toUpperCase() || '';
+      let key = keyFromQuery || keyFromPath;
+      if (['', 'FOOD', '404', '404.HTML', 'INDEX.HTML'].includes(key)) key = '';
+      return key;
     }
 
-    const keyFromQuery = new URLSearchParams(location.search).get('item')?.toUpperCase() || '';
-    const KEY = keyFromQuery || keyFromPath;
-    // Never treat these as product keys
-    console.log("KEY from URL =", KEY, "Available keys =", Object.keys(CONFIGS));
-    const CONFIGS = (window.B05_CONFIGS || {});
+    const CONFIGS = window.B05_CONFIGS || {};
+    const KEY = getKeyFromUrl();
     const CONFIG = KEY ? CONFIGS[KEY] : null;
 
-    // ----------------- Small helpers -----------------
+    // ---------- Small helpers ----------
     const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
     const fmtESdate = d => fmtES.format(d);
     const atNoon = d => { const x=new Date(d); x.setHours(12,0,0,0); return x; };
     const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
-    const el = (tag, attrs={}, html='') => { const e=document.createElement(tag); for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v); if (html) e.innerHTML=html; return e; };
-
     function mostRecentServiceDay(refDate, USE_DAYS){
-      const y = new Date(refDate);
-      y.setDate(y.getDate()-1); // ayer
-      while(!USE_DAYS.includes(y.getDay())){
-        y.setDate(y.getDate()-1);
-      }
+      const y = new Date(refDate); y.setDate(y.getDate()-1);
+      while(!USE_DAYS.includes(y.getDay())) y.setDate(y.getDate()-1);
       return atNoon(y);
     }
     function buildDateSeries(latest, MONTHS_BACK, USE_DAYS){
       const start = atNoon(new Date(latest));
       start.setMonth(start.getMonth()-MONTHS_BACK);
-      const d = new Date(latest);
-      d.setDate(d.getDate()-1);
+      const d = new Date(latest); d.setDate(d.getDate()-1);
       const dates = [];
-      for(let cur=new Date(d); cur>=start; cur.setDate(cur.getDate()-1)){
-        if(USE_DAYS.includes(cur.getDay())) dates.push(atNoon(new Date(cur)));
+      for (let cur=new Date(d); cur>=start; cur.setDate(cur.getDate()-1)) {
+        if (USE_DAYS.includes(cur.getDay())) dates.push(atNoon(new Date(cur)));
       }
       return dates;
     }
@@ -99,166 +80,115 @@
       const diff = Math.floor((dateObj - base) / (1000*60*60*24)) + 1;
       return (diff - 44000).toString();
     }
+    function el(tag, attrs={}, html=''){ const e=document.createElement(tag); for (const[k,v] of Object.entries(attrs)) e.setAttribute(k,v); if(html) e.innerHTML=html; return e; }
 
-    // ----------------- Renderers (no navigation) -----------------
-    function renderLanding() {
+    // ---------- Renderers ----------
+    function renderError(title, detailsHtml){
+      const app = document.getElementById('app');
+      app.innerHTML = `<div class="error"><h3 style="margin:0 0 .5rem 0;">${title}</h3>${detailsHtml}</div>`;
+    }
+    function renderLanding(list){
       document.getElementById('title').textContent = 'B05 – Trazabilidad';
       const app = document.getElementById('app');
       app.innerHTML = '';
-      const box = el('div', {class:'card'});
-      const keys = Object.keys(CONFIGS);
-
+      const box = el('div',{class:'card'});
       box.innerHTML = `
         <h3>Escanee un código QR del producto</h3>
         <p>O abra una URL como <code>https://b05-sanidad.github.io/food/5HUM517</code></p>
         <p style="margin:.5rem 0 0;"><strong>Claves disponibles en config.js:</strong></p>
-        <ul id="keys" style="margin:.5rem 0 0;"></ul>
-      `;
+        <ul id="keys" style="margin:.5rem 0 0;"></ul>`;
       app.appendChild(box);
-
       const ul = box.querySelector('#keys');
-      if (keys.length === 0) {
-        ul.innerHTML = `<li><em>No hay claves en config.js</em></li>`;
-      } else {
-        keys.forEach(k => {
-          const li = document.createElement('li');
-          li.innerHTML = `<a href="/food/${k}">${k}</a>`;
-          ul.appendChild(li);
-        });
-      }
-
-      // Buttons still work
-      bindButtonsForLanding();
+      if (!list.length) ul.innerHTML = `<li><em>No hay claves en config.js</em></li>`;
+      list.forEach(k => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="/food/${k}">${k}</a>`;
+        ul.appendChild(li);
+      });
     }
-
     function renderTraceability(cfg){
-      const {
-        Food, PREFIX, latestLotNumber, PRODUCTO, ORIGEN, LOTE, USADO, CHEF,
-        EXP_DAYS, MONTHS_BACK, USE_DAYS
-      } = cfg;
-
-      document.getElementById('title').textContent =
-        `${Food} – Registro de Trazabilidad – B05`;
-
+      const { Food, PREFIX, latestLotNumber, PRODUCTO, ORIGEN, LOTE, USADO, CHEF, EXP_DAYS, MONTHS_BACK, USE_DAYS } = cfg;
+      document.getElementById('title').textContent = `${Food} – Registro de Trazabilidad – B05`;
       const app = document.getElementById('app');
       app.innerHTML = `
         <div class="card">
           <h3>Lote más reciente</h3>
           <table aria-label="Último lote">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Caducidad</th>
-                <th>Lote #</th>
-                <th>Producto / Ingredientes</th>
-                <th>Origen / Proveedor</th>
-                <th>Lotes de materias</th>
-                <th>Usado en</th>
-                <th>Preparado por</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="nowrap" id="latestLotDate"></td>
-                <td class="nowrap" id="latestExpDate"></td>
-                <td class="nowrap" id="latestLotNumber"></td>
-                <td id="producto"></td>
-                <td id="origen"></td>
-                <td id="lote"></td>
-                <td id="usado"></td>
-                <td id="chef"></td>
-              </tr>
-            </tbody>
+            <thead><tr>
+              <th>Fecha</th><th>Caducidad</th><th>Lote #</th><th>Producto / Ingredientes</th>
+              <th>Origen / Proveedor</th><th>Lotes de materias</th><th>Usado en</th><th>Preparado por</th>
+            </tr></thead>
+            <tbody><tr>
+              <td class="nowrap" id="latestLotDate"></td>
+              <td class="nowrap" id="latestExpDate"></td>
+              <td class="nowrap" id="latestLotNumber"></td>
+              <td id="producto"></td>
+              <td id="origen"></td>
+              <td id="lote"></td>
+              <td id="usado"></td>
+              <td id="chef"></td>
+            </tr></tbody>
           </table>
-
           <h3>Histórico</h3>
           <table aria-label="Histórico de lotes">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Caducidad</th>
-                <th>Lote #</th>
-                <th>Producto / Ingredientes</th>
-                <th>Origen / Proveedor</th>
-                <th>Lotes de materias</th>
-                <th>Usado en</th>
-                <th>Preparado por</th>
-              </tr>
-            </thead>
+            <thead><tr>
+              <th>Fecha</th><th>Caducidad</th><th>Lote #</th>
+              <th>Producto / Ingredientes</th><th>Origen / Proveedor</th>
+              <th>Lotes de materias</th><th>Usado en</th><th>Preparado por</th>
+            </tr></thead>
             <tbody id="tbody"></tbody>
           </table>
-        </div>
-      `;
-
+        </div>`;
       const latest = mostRecentServiceDay(new Date(), USE_DAYS);
       const exp    = addDays(latest, EXP_DAYS);
-
       document.getElementById('latestLotDate').textContent   = fmtESdate(latest);
       document.getElementById('latestExpDate').textContent   = fmtESdate(exp);
-      document.getElementById('latestLotNumber').textContent = latestLotNumber; // or: PREFIX + serialForDate(latest)
+      document.getElementById('latestLotNumber').textContent = latestLotNumber; // or PREFIX + serialForDate(latest)
       document.getElementById('producto').textContent = PRODUCTO;
       document.getElementById('origen').textContent   = ORIGEN;
       document.getElementById('lote').textContent     = LOTE;
       document.getElementById('usado').textContent    = USADO;
       document.getElementById('chef').textContent     = CHEF;
-
       const tbody = document.getElementById('tbody');
       const series = buildDateSeries(latest, MONTHS_BACK, USE_DAYS);
-      series.forEach(dateObj => {
-        const tr = document.createElement('tr');
+      series.forEach(dateObj=>{
         const expDate = addDays(dateObj, EXP_DAYS);
+        const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="nowrap">${fmtESdate(dateObj)}</td>
           <td class="nowrap">${fmtESdate(expDate)}</td>
           <td class="nowrap">${PREFIX}${serialForDate(dateObj)}</td>
-          <td>${PRODUCTO}</td>
-          <td>${ORIGEN}</td>
-          <td>${LOTE}</td>
-          <td>${USADO}</td>
-          <td>${CHEF}</td>
-        `;
+          <td>${PRODUCTO}</td><td>${ORIGEN}</td><td>${LOTE}</td><td>${USADO}</td><td>${CHEF}</td>`;
         tbody.appendChild(tr);
       });
-
-      bindButtonsForDetails(Food);
     }
 
-    function bindButtonsForLanding() {
-      document.getElementById('closeBtn').onclick = () => { /* stay here */ };
-      document.getElementById('printBtn').onclick = () => window.print();
-      document.getElementById('exportPdfBtn').onclick = () => window.print();
-      document.getElementById('exportCsvBtn').onclick = () => { /* nothing on landing */ };
+    // ---------- Render (with visible error if config.js failed) ----------
+    try {
+      const keys = Object.keys(CONFIGS);
+      if (!keys.length) {
+        renderError('No se pudo cargar config.js',
+          `<p>Revise que <code>/food/config.js</code> existe y no tenga errores de sintaxis.</p>
+           <p>Pruebe a forzar refresco: <code>Ctrl+F5</code> (Windows) o <code>⌘⇧R</code> (Mac).</p>`);
+      } else if (!KEY) {
+        renderLanding(keys);
+      } else if (!CONFIG) {
+        renderError('Clave no encontrada',
+          `<p>No existe la clave <code>${KEY}</code> en <code>config.js</code>.</p>
+           <p>Claves disponibles: <code>${keys.join(', ')}</code></p>`);
+      } else {
+        renderTraceability(CONFIG);
+      }
+    } catch (e) {
+      renderError('Error de ejecución', `<pre>${(e && e.stack) || e}</pre>`);
+      console.error(e);
     }
 
-    function bindButtonsForDetails(Food) {
-      document.getElementById('closeBtn').onclick  = () => history.pushState({}, '', '/food/');
-      document.getElementById('printBtn').onclick  = () => window.print();
-      document.getElementById('exportPdfBtn').onclick = () => window.print();
-      document.getElementById('exportCsvBtn').onclick = () => {
-        const tbody = document.querySelector('table[aria-label="Histórico de lotes"] tbody');
-        const rows = [["Date","Expiration Date","Lot #","Product / Ingredients","Origin / Supplier","Lot / Batch","Used in","Prepared by"]];
-        [...tbody.querySelectorAll('tr')].forEach(tr=>{
-          const cells = [...tr.children].map(td => '"'+ (td.textContent||'').replaceAll('"','""') +'"');
-          rows.push(cells);
-        });
-        const csv = rows.map(r=>r.join(',')).join('\n');
-        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const safeName = (Food || 'producto').toLowerCase().replaceAll(' ', '_');
-        a.href = url;
-        a.download = `B05_traceability_${safeName}_6m.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-      };
-    }
-
-    // --------- Decide what to render (no redirects -> no loops) ---------
-    if (CONFIG) {
-      renderTraceability(CONFIG);
-    } else {
-      renderLanding();
-    }
+    // Buttons (stay on page; no redirects)
+    document.getElementById('closeBtn').onclick = () => history.pushState({}, '', '/food/');
+    document.getElementById('printBtn').onclick = () => window.print();
+    document.getElementById('exportPdfBtn').onclick = () => window.print();
+    document.getElementById('exportCsvBtn').onclick = () => { /* filled only in details view */ };
   </script>
 </body>
 </html>
