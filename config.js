@@ -13,7 +13,7 @@ const CONFIG = (window.B05_CONFIGS || {})[KEY];
 
 if (!CONFIG) {
   // fall back gracefully
-  location.replace('./');  // or show a nicer message if you prefer
+  location.replace('./');  // or kkshow a nicer message if you prefer
 }
 window.B05_CONFIGS = {
     "5HUM517": {
