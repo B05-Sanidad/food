@@ -24,6 +24,18 @@ window.B05_CONFIGS = {
     EXP_DAYS: 5, MONTHS_BACK: 6, USE_DAYS: [2, 5]
   },
 
+ "29MUH431": {
+    Food: "LOVEME",
+    PREFIX: "29-MUH-",
+    latestLotNumber: "29-MUH-430",
+    PRODUCTO: "LOvE LOVE rojo, Nueces, Melaza de granada, Pan rallado, Aceite, Especias, Sal",
+    ORIGEN: "Makro / Carrefour / Oasis",
+    LOTE: "Pimiento L430, Nueces L221",
+    USADO: "Mezze",
+    CHEF: "Chef B05",
+    EXP_DAYS: 10, MONTHS_BACK: 6, USE_DAYS: [1]
+  },
+
   "29MUH430": {
     Food: "MOUHAMMARA",
     PREFIX: "29-MUH-",
