@@ -53,6 +53,8 @@
 
     const CONFIGS = window.B05_CONFIGS || {};
     const KEY = getKeyFromUrl();
+    console.log("KEY from URL =", KEY);
+console.log("Available keys =", Object.keys(window.B05_CONFIGS || {}));
     const CONFIG = KEY ? CONFIGS[KEY] : null;
 
     // ---------- Small helpers ----------
