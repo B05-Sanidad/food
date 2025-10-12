@@ -63,8 +63,7 @@
 
     const keyFromQuery = new URLSearchParams(location.search).get('item')?.toUpperCase() || '';
     const KEY = keyFromQuery || keyFromPath;
-    // toberemoved
-
+    // Never treat these as product keys
     console.log("KEY from URL =", KEY, "Available keys =", Object.keys(CONFIGS));
     const CONFIGS = (window.B05_CONFIGS || {});
     const CONFIG = KEY ? CONFIGS[KEY] : null;
