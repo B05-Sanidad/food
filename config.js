@@ -39,7 +39,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 180,
     MONTHS_BACK: 6,
-    USE_DAYS: [0]
+    USE_DAYS: [14]
   },
 
   "29MUH430": {
