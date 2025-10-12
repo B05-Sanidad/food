@@ -37,7 +37,7 @@ window.B05_CONFIGS = {
     LOTE: "Pimiento L431, Nueces L221", // (opcional) alineado con 431
     USADO: "AIRE",
     CHEF: "Chef B05",
-    EXP_DAYS: 30,
+    EXP_DAYS: 180,
     MONTHS_BACK: 6,
     USE_DAYS: [0]
   },
