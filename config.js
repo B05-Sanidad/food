@@ -4,7 +4,7 @@ window.B05_CONFIGS = {
     Food: "HOMMUS",
     PREFIX: "5-HOM-",
     latestLotNumber: "5-HOM-517",
-    PRODUCTO: "aire Garbanzos cocidos, Tahini, Limón, Aceite de oliva, Ajo, Sal",
+    PRODUCTO: "Garbanzos cocidos, Tahini, Limón, Aceite de oliva, Ajo, Sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Garbanzos L778, Tahini L120, Aceite L221",
     USADO: "Hummus",

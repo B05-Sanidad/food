@@ -19,7 +19,6 @@
     th, td { padding: .6rem .75rem; text-align: left; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
     th { position: sticky; top: 0; background: #fafafa; font-weight: 700; color: #475569; }
     .nowrap { white-space: nowrap; }
-    /* only latest date cells in red */
     #latestLotDate, #latestExpDate { color: red; font-weight: 600; }
     @media print {
       header { display:none !important; }
@@ -89,34 +88,37 @@
     </div>
   </main>
 
-  <!-- Load configs FIRST -->
+  <!-- Load external config -->
   <script src="./config.js"></script>
 
   <script>
-    // --- Key from URL path (/food/5HUM517) or ?item=5HUM517
+    // === Identify key from URL path (like /food/5HUM517)
     const parts = location.pathname.split('/').filter(Boolean);
-    const keyFromPath  = (parts[parts.length - 1] || '').toUpperCase();
+    let keyFromPath = (parts[parts.length - 1] || '').toUpperCase();
+
+    // Ignore "404" when GitHub Pages serves 404.html
+    if (keyFromPath === '404' || keyFromPath === '404.HTML') {
+      // Redirect safely to root of /food/
+      location.replace('./');
+    }
+
     const keyFromQuery = new URLSearchParams(location.search).get('item')?.toUpperCase();
     const KEY = keyFromQuery || keyFromPath;
 
     const CONFIG = (window.B05_CONFIGS || {})[KEY];
 
+    // If nothing matches, redirect back to main list
     if (!CONFIG) {
-      document.body.innerHTML = `
-        <main style="max-width:700px;margin:2rem auto;font-family:Arial;">
-          <h2>No se encontró configuración para <code>${KEY || '(sin clave)'}</code></h2>
-          <p>Revise <strong>/food/config.js</strong> y añada la clave dentro de <code>window.B05_CONFIGS</code>.</p>
-          <p>Ejemplos: <code>/food/5HUM517</code> o <code>/food/index.html?item=5HUM517</code></p>
-          <p><a href="./">Volver</a></p>
-        </main>`;
-      throw new Error('Missing CONFIG for ' + KEY);
+      location.replace('./');
     }
 
+    // --- Extract config values
     const {
       Food, PREFIX, latestLotNumber, PRODUCTO, ORIGEN, LOTE, USADO, CHEF,
       EXP_DAYS, MONTHS_BACK, USE_DAYS
     } = CONFIG;
 
+    // --- Utility functions
     const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
     function atNoon(d){ const x=new Date(d); x.setHours(12,0,0,0); return x; }
     function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
@@ -152,18 +154,18 @@
       const latest = mostRecentServiceDay(new Date());
       const exp    = addDays(latest, EXP_DAYS);
 
-      // Top row
+      // Fill top table
       document.getElementById('title').textContent = `${Food} – Registro de Trazabilidad – B05`;
       document.getElementById('latestLotDate').textContent   = fmtES.format(latest);
       document.getElementById('latestExpDate').textContent   = fmtES.format(exp);
-      document.getElementById('latestLotNumber').textContent = latestLotNumber; // or: PREFIX + serialForDate(latest)
+      document.getElementById('latestLotNumber').textContent = latestLotNumber;
       document.getElementById('producto').textContent = PRODUCTO;
       document.getElementById('origen').textContent   = ORIGEN;
       document.getElementById('lote').textContent     = LOTE;
       document.getElementById('usado').textContent    = USADO;
       document.getElementById('chef').textContent     = CHEF;
 
-      // Historic rows
+      // Fill historic rows
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = '';
       const series = buildDateSeries(latest);
@@ -184,10 +186,9 @@
       });
     }
 
-    // Buttons
+    // --- Buttons ---
     document.getElementById('closeBtn').addEventListener('click', () => {
-      // go back to your menu page (change if needed)
-      location.href = './main.html';
+      location.href = './';
     });
     document.getElementById('printBtn').addEventListener('click', () => window.print());
     document.getElementById('exportPdfBtn').addEventListener('click', () => window.print());
@@ -209,7 +210,7 @@
       URL.revokeObjectURL(url);
     });
 
-    // Go!
+    // --- Generate content on load ---
     generate();
   </script>
 </body>
