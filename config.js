@@ -11,8 +11,8 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 4,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 4,
-    USE_DAYS: [2, 5]
+    DAYS_PRODUCTION: 4,   // ⬅️ histórico cada 4 días (nunca lunes)
+    USE_DAYS: [2, 5]      // (solo se usa si NO hay DAYS_PRODUCTION)
   },
 
   "11BER610": {
@@ -26,23 +26,23 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 7,
+    DAYS_PRODUCTION: 7,   // ⬅️ histórico cada 7 días (nunca lunes)
     USE_DAYS: [2, 5]
   },
 
-  "LOVEME": {
+  "29MUH431": {           // ⬅️ clave alineada con el lote
     Food: "LOVEME",
     PREFIX: "29-MUH-",
     latestLotNumber: "29-MUH-431",
     PRODUCTO: "LOvE LOVE rojo, Nueces, Melaza de granada, Pan rallado, Aceite, Especias, Sal",
     ORIGEN: "Makro / Carrefour / Oasis",
-    LOTE: "Pimiento L431, Nueces L221", // (opcional) alineado con 431
+    LOTE: "Pimiento L431, Nueces L221",
     USADO: "AIRE",
     CHEF: "Chef B05",
     EXP_DAYS: 180,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 20,
-    USE_DAYS: [14]
+    DAYS_PRODUCTION: 20,  // ⬅️ histórico cada 20 días (nunca lunes)
+    USE_DAYS: [2]         // valor válido 0..6; aquí martes (no se usa si hay DAYS_PRODUCTION)
   },
 
   "29MUH430": {
@@ -56,8 +56,8 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 10,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 15,
-    USE_DAYS: [1]
+    DAYS_PRODUCTION: 15,  // ⬅️ histórico cada 15 días (nunca lunes)
+    USE_DAYS: [1]         // lunes (solo si NO hay DAYS_PRODUCTION)
   },
 
   "11PAR702": {
@@ -71,7 +71,7 @@ window.B05_CONFIGS = {
     CHEF: "Chef B05",
     EXP_DAYS: 5,
     MONTHS_BACK: 6,
-     DAYS_PRODUCTION: 10,
+    DAYS_PRODUCTION: 20,  // ⬅️ histórico cada 20 días (nunca lunes)
     USE_DAYS: [2, 5]
   }
 };
