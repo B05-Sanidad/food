@@ -28,7 +28,7 @@
       .card{box-shadow:none;margin:0;padding:0;}th{position:static;}}
   </style>
   <!-- ABSOLUTE path so it loads whether served via /food/index.html or /404.html -->
-<script src="/food/config.js?v=2025-10-12-2"></script></head>
+<script src="/food/config.js?v=2025-10-12-3"></script></head>
 <body>
   <header>
     <h1 id="title">B05 – Trazabilidad</h1>
@@ -56,14 +56,16 @@
     const repoRoot = parts[0] === 'food' ? 'food' : parts[0] || '';
     let keyFromPath = (parts.length >= 2 && parts[0] === 'food') ? parts[1].toUpperCase() : '';
 
-    // Never treat these as product keys
+
     if (keyFromPath === 'FOOD' || keyFromPath === '404' || keyFromPath === '404.HTML' || keyFromPath === 'INDEX.HTML') {
       keyFromPath = '';
     }
 
     const keyFromQuery = new URLSearchParams(location.search).get('item')?.toUpperCase() || '';
     const KEY = keyFromQuery || keyFromPath;
+    // toberemoved
 
+    console.log("KEY from URL =", KEY, "Available keys =", Object.keys(CONFIGS));
     const CONFIGS = (window.B05_CONFIGS || {});
     const CONFIG = KEY ? CONFIGS[KEY] : null;
 
