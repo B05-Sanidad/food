@@ -4,57 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>B05 – Traceability</title>
-
-  <!--
-    =============================================
-    B05 – TRACEABILITY (READABLE VERSION)
-    ---------------------------------------------
-    • Reads a product key from the URL:
-        /food/                → landing (list of keys)
-        /food/<KEY>           → open that product
-        /food/index.html?item=<KEY> → also works
-    • Loads /food/config.js (pure data) and renders
-      the "Último lote" and "Histórico" tables.
-
-    CHANGE IN THIS VERSION
-    ----------------------
-    • Added a new column **Duración (Días)** before **Lote #** in BOTH tables.
-      It shows the numeric value of EXP_DAYS from config.js.
-
-    CONFIG FIELDS (per item in config.js)
-    -------------------------------------
-      Food            : String – Product name, used in page title
-      PREFIX          : String – Prefix used to build lot codes for history rows
-      latestLotNumber : String – The latest lot code shown in the first table
-      PRODUCTO        : String – ingredients
-      ORIGEN          : String – suppliers
-      LOTE            : String – raw-material lots
-      USADO           : String – where used
-      CHEF            : String – prepared by
-      EXP_DAYS        : Number – days until expiry for each row
-      MONTHS_BACK     : Number – how many months of history to generate
-      DAYS_PRODUCTION : Number – gap in days between batches (strict cadence)
-      PROD_ANCHOR     : String "YYYY-MM-DD" – anchor date to align cadence
-
-    RULES
-    -----
-      • Interval mode (recommended): If DAYS_PRODUCTION is present (>0),
-        the historical series is generated every N days, starting from
-        PROD_ANCHOR. If any computed date falls on Monday, it shifts to Sunday.
-      • Weekday fallback (legacy): If DAYS_PRODUCTION is not present,
-        USE_DAYS (array of day indexes, Sun=0..Sat=6) may be used; but this
-        template focuses on interval mode for simplicity.
-
-    HOW TO DEPLOY
-    -------------
-      1) Upload this file as /food/index.html
-      2) Also upload a copy as  /food/404.html  (same content)
-      3) Upload /food/config.js (pure data)
-      4) Visit /food/ or /food/<KEY>
-
-    =============================================
-  -->
-
   <style>
     :root { --brand:#3A5C1E; --beige:#F1F1E6; }
     html { font-size:12px; }
@@ -66,222 +15,86 @@
     main { padding:1rem 1.5rem 3rem; flex-grow:1; }
     .card { background:#fff; border-radius:1rem; box-shadow:0 8px 30px rgba(0,0,0,.06); max-width:1100px; margin:0 auto; padding:1rem; overflow-x:auto; }
     h3 { margin:.5rem 0; color:#334155; }
-    table { width:100%; border-collapse:separate; border-spacing:0; font-size:.85rem; margin-top:.5rem; }
+    table { width:100%; border-collapse:collapse; font-size:.85rem; margin-top:.5rem; }
     th, td { padding:.6rem .75rem; text-align:left; border-bottom:1px solid #e2e8f0; vertical-align:top; }
-    th { position:sticky; top:0; background:#fafafa; font-weight:700; color:#475569; }
+    th { background:#fafafa; font-weight:700; color:#475569; }
     .nowrap { white-space:nowrap; }
     #latestLotDate, #latestExpDate { color:red; font-weight:600; }
-    .error { max-width:900px; margin:2rem auto; padding:1rem 1.25rem; border:1px solid #fecaca; background:#fff1f2; color:#7f1d1d; border-radius:.75rem; font-family:Arial; }
-    code { background:#f1f5f9; padding:0 .25rem; border-radius:.25rem; }
-    @media print {
-      header { display:none!important; }
-      main { padding:0; }
-      .card { box-shadow:none; margin:0; padding:0; }
-      th { position:static; }
-    }
   </style>
 </head>
 <body>
-  <!-- Top bar -->
   <header>
     <h1 id="title">B05 – Trazabilidad</h1>
     <div>
-      <button id="closeBtn" class="btn btn-brand" type="button">❌ Close</button>
-      <button id="exportCsvBtn" class="btn" type="button">⬇️ Exportar CSV</button>
-      <button id="printBtn" class="btn" type="button">🖨️ Imprimir</button>
-      <button id="exportPdfBtn" class="btn" type="button">📄 Exportar PDF</button>
+      <button id="closeBtn" class="btn btn-brand">❌ Cerrar</button>
+      <button id="exportCsvBtn" class="btn">⬇️ Exportar CSV</button>
+      <button id="printBtn" class="btn">🖨️ Imprimir</button>
     </div>
   </header>
-
-  <!-- Main content container (landing or traceability view) -->
   <main id="app"></main>
 
   <script>
-    /* ---------------------------------------------------------
-       URL → KEY detection (supports /food/, /food/KEY, ?item=KEY)
-       --------------------------------------------------------- */
-    function getKeyFromUrl() {
-      const parts = location.pathname.replace(/\/+/g,'/').split('/').filter(Boolean);
-      // expected: ["food"] or ["food","KEY"]
-      let keyFromPath = (parts[0] === 'food' && parts[1]) ? decodeURIComponent(parts[1]).toUpperCase() : '';
-      const qs = new URLSearchParams(location.search);
-      let keyFromQuery = (qs.get('item') || '').toUpperCase();
-      let key = keyFromQuery || keyFromPath;
-      if (['', 'FOOD', '404', '404.HTML', 'INDEX.HTML'].includes(key)) key = '';
+    const fmtES = new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const atNoon=d=>{const x=new Date(d);x.setHours(12,0,0,0);return x;}
+    const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+
+    function getKeyFromUrl(){
+      const p=location.pathname.split('/').filter(Boolean);
+      let key=p.length>1?p[1].toUpperCase():'';
+      const q=new URLSearchParams(location.search).get('item');
+      if(q) key=q.toUpperCase();
+      if(['','FOOD','404','404.HTML'].includes(key)) key='';
       return key;
     }
 
-    /* -------------------
-       Generic JS helpers
-       ------------------- */
-    const fmtES = new Intl.DateTimeFormat('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
-    const fmtESdate = d => fmtES.format(d);
-
-    // normalize a Date to 12:00:00 to avoid DST/weirdness
-    function atNoon(d) {
-      const x = new Date(d);
-      x.setHours(12, 0, 0, 0);
-      return x;
+    function parseISODate(s){
+      const [Y,M,D]=String(s||'').split('-').map(Number);
+      if(!Y) return atNoon(new Date(2025,0,1));
+      return atNoon(new Date(Y,M-1,D));
     }
 
-    function addDays(d, n) {
-      const x = new Date(d);
-      x.setDate(x.getDate() + n);
-      return x;
+    function mostRecentProduction(ref,cfg){
+      const step=Number(cfg.DAYS_PRODUCTION)||7;
+      const anchor=cfg.PROD_ANCHOR?parseISODate(cfg.PROD_ANCHOR):parseISODate('2025-01-01');
+      const msPerDay=86400000;
+      const daysFromAnchor=Math.floor((atNoon(ref)-anchor)/msPerDay);
+      const k=Math.floor(daysFromAnchor/step);
+      let d=addDays(anchor,k*step);
+      if(d.getDay()===1)d=addDays(d,-1);
+      return atNoon(d);
     }
 
-    // small helper to create DOM nodes
-    function el(tag, attrs = {}, html = '') {
-      const e = document.createElement(tag);
-      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
-      if (html) e.innerHTML = html;
-      return e;
-    }
-
-    /* ---------------------------------------------------------
-       Interval-based production logic (recommended mode)
-       - DAYS_PRODUCTION: integer N (days between batches)
-       - PROD_ANCHOR   : "YYYY-MM-DD" (align the cadence)
-       - Never Monday: if computed date is Monday, shift to Sunday
-       --------------------------------------------------------- */
-    function parseISODate(iso) {
-      const [Y, M, D] = String(iso || '').split('-').map(Number);
-      if (!Y || !M || !D) return atNoon(new Date(2025, 0, 1)); // sane default
-      return atNoon(new Date(Y, M - 1, D));
-    }
-
-    function snapToInterval(refDate, stepDays, anchorDate) {
-      const msPerDay = 86400000;
-      const ref = atNoon(refDate).getTime();
-      const anchor = atNoon(anchorDate).getTime();
-      const daysFromAnchor = Math.floor((ref - anchor) / msPerDay);
-      const k = Math.floor(daysFromAnchor / stepDays);
-      return addDays(anchorDate, k * stepDays);
-    }
-
-    // Compute the most recent production date
-    function mostRecentProduction(refDate, cfg) {
-      const step = Number(cfg.DAYS_PRODUCTION);
-      if (Number.isInteger(step) && step > 0) {
-        const anchor = cfg.PROD_ANCHOR ? parseISODate(cfg.PROD_ANCHOR) : parseISODate('2025-01-01');
-        let snapped = snapToInterval(addDays(refDate, -1), step, anchor); // start from yesterday
-        if (snapped.getDay() === 1) snapped = addDays(snapped, -1);      // Monday → Sunday
-        return atNoon(snapped);
+    function buildSeries(latest,cfg){
+      const back=cfg.MONTHS_BACK||6;
+      const step=cfg.DAYS_PRODUCTION||7;
+      const anchor=cfg.PROD_ANCHOR?parseISODate(cfg.PROD_ANCHOR):parseISODate('2025-01-01');
+      const start=new Date(latest);start.setMonth(start.getMonth()-back);
+      const arr=[];
+      for(let d=latest;d>=start;d=addDays(d,-step)){
+        let dd=new Date(d);
+        if(dd.getDay()===1)dd=addDays(dd,-1);
+        arr.push(atNoon(dd));
       }
-      // Fallback: weekday mode (only if you define cfg.USE_DAYS = [0..6])
-      const days = Array.isArray(cfg.USE_DAYS) ? cfg.USE_DAYS : [];
-      const y = new Date(refDate); y.setDate(y.getDate() - 1);
-      if (days.length === 0) return atNoon(y);
-      while (!days.includes(y.getDay())) y.setDate(y.getDate() - 1);
-      return atNoon(y);
+      return arr;
     }
 
-    // Build the historical series (descending) for the past N months
-    function buildDateSeriesDynamic(latest, cfg) {
-      const monthsBack = cfg.MONTHS_BACK || 6;
-      const start = atNoon(new Date(latest));
-      start.setMonth(start.getMonth() - monthsBack);
-
-      const step = Number(cfg.DAYS_PRODUCTION);
-      const dates = [];
-
-      if (Number.isInteger(step) && step > 0) {
-        const anchor = cfg.PROD_ANCHOR ? parseISODate(cfg.PROD_ANCHOR) : parseISODate('2025-01-01');
-        const msPerDay = 86400000;
-        const kLatest = Math.floor((latest.getTime() - anchor.getTime()) / msPerDay / step);
-        for (let k = kLatest; ; k--) {
-          let d = addDays(anchor, k * step);
-          if (d.getDay() === 1) d = addDays(d, -1); // Monday → Sunday
-          if (d < start) break;
-          dates.push(atNoon(d));
-        }
-        return dates;
-      }
-
-      // Weekday fallback (if you use USE_DAYS)
-      const days = Array.isArray(cfg.USE_DAYS) ? cfg.USE_DAYS : [];
-      const d = new Date(latest); d.setDate(d.getDate() - 1);
-      for (let cur = new Date(d); cur >= start; cur.setDate(cur.getDate() - 1)) {
-        if (days.includes(cur.getDay())) dates.push(atNoon(new Date(cur)));
-      }
-      return dates;
-    }
-
-    // Deterministic serial from date (short readable code)
-    function serialForDate(dateObj) {
-      const base = new Date(1904, 0, 1);
-      const diff = Math.floor((dateObj - base) / (1000 * 60 * 60 * 24)) + 1;
-      return (diff - 44000).toString();
-    }
-
-    /* --------------------------
-       Rendering: landing / error
-       -------------------------- */
-    function renderError(title, detailsHtml) {
-      const app = document.getElementById('app');
-      app.innerHTML = `<div class="error"><h3 style="margin:0 0 .5rem 0;">${title}</h3>${detailsHtml}</div>`;
-    }
-
-    function renderLanding(list) {
-      document.getElementById('title').textContent = 'B05 – Trazabilidad';
-      const app = document.getElementById('app');
-      app.innerHTML = '';
-
-      const box = el('div', { class: 'card' });
-      box.innerHTML = [
-        '<h3>Escanee un código QR del producto</h3>',
-        '<p>O abra una URL como <code>https://b05-sanidad.github.io/food/5HUM517</code></p>',
-        '<p style="margin:.5rem 0 0;"><strong>Claves disponibles en config.js:</strong></p>',
-        '<ul id="keys" style="margin:.5rem 0 0;"></ul>'
-      ].join('');
-      app.appendChild(box);
-
-      const ul = box.querySelector('#keys');
-      if (!list.length) {
-        ul.innerHTML = '<li><em>No hay claves en config.js</em></li>';
-      } else {
-        list.forEach(k => {
-          const li = document.createElement('li');
-          li.innerHTML = `<a href="/food/${k}">${k}</a>`;
-          ul.appendChild(li);
-        });
-      }
-    }
-
-    /* --------------------------
-       Rendering: main data view
-       -------------------------- */
-    function renderTraceability(cfg) {
-      const { Food, PREFIX, latestLotNumber, PRODUCTO, ORIGEN, LOTE, USADO, CHEF, EXP_DAYS } = cfg;
-
-      // Title
-      document.getElementById('title').textContent = `${Food} – Registro de Trazabilidad – B05`;
-
-      // Skeleton
-      const app = document.getElementById('app');
-      app.innerHTML = `
+    function renderTrace(cfg){
+      const app=document.getElementById('app');
+      app.innerHTML=`
         <div class="card">
           <h3>Lote más reciente</h3>
-          <table aria-label="Último lote">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Caducidad</th>
-                <th>Duración (Días)</th>
-                <th>Lote #</th>
-                <th>Producto / Ingredientes</th>
-                <th>Origen / Proveedor</th>
-                <th>Lotes de materias</th>
-                <th>Usado en</th>
-                <th>Preparado por</th>
-              </tr>
-            </thead>
+          <table>
+            <thead><tr>
+              <th>Fecha</th><th>Caducidad</th><th>Duración (Días)</th><th>Lote #</th>
+              <th>Producto / Ingredientes</th><th>Origen / Proveedor</th><th>Lotes</th>
+              <th>Usado en</th><th>Preparado por</th>
+            </tr></thead>
             <tbody>
               <tr>
-                <td class="nowrap" id="latestLotDate"></td>
-                <td class="nowrap" id="latestExpDate"></td>
-                <td class="nowrap" id="latestExpDays"></td>
-                <td class="nowrap" id="latestLotNumber"></td>
+                <td id="latestLotDate"></td>
+                <td id="latestExpDate"></td>
+                <td id="latestExpDays"></td>
+                <td id="latestLotNumber"></td>
                 <td id="producto"></td>
                 <td id="origen"></td>
                 <td id="lote"></td>
@@ -292,129 +105,61 @@
           </table>
 
           <h3>Histórico</h3>
-          <table aria-label="Histórico de lotes">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Caducidad</th>
-                <th>Duración (Días)</th>
-                <th>Lote #</th>
-                <th>Producto / Ingredientes</th>
-                <th>Origen / Proveedor</th>
-                <th>Lotes de materias</th>
-                <th>Usado en</th>
-                <th>Preparado por</th>
-              </tr>
-            </thead>
+          <table>
+            <thead><tr>
+              <th>Fecha</th><th>Caducidad</th><th>Duración (Días)</th><th>Lote #</th>
+              <th>Producto / Ingredientes</th><th>Origen / Proveedor</th><th>Lotes</th>
+              <th>Usado en</th><th>Preparado por</th>
+            </tr></thead>
             <tbody id="tbody"></tbody>
           </table>
-        </div>
-      `;
+        </div>`;
 
-      // Latest lot
-      const latest = mostRecentProduction(new Date(), cfg);
-      const exp    = addDays(latest, EXP_DAYS);
+      const latest=mostRecentProduction(new Date(),cfg);
+      const exp=addDays(latest,cfg.EXP_DAYS);
+      document.getElementById('latestLotDate').textContent=fmtES.format(latest);
+      document.getElementById('latestExpDate').textContent=fmtES.format(exp);
+      document.getElementById('latestExpDays').textContent=cfg.EXP_DAYS;
+      document.getElementById('latestLotNumber').textContent=cfg.latestLotNumber;
+      document.getElementById('producto').textContent=cfg.PRODUCTO;
+      document.getElementById('origen').textContent=cfg.ORIGEN;
+      document.getElementById('lote').textContent=cfg.LOTE;
+      document.getElementById('usado').textContent=cfg.USADO;
+      document.getElementById('chef').textContent=cfg.CHEF;
 
-      document.getElementById('latestLotDate').textContent   = fmtESdate(latest);
-      document.getElementById('latestExpDate').textContent   = fmtESdate(exp);
-      document.getElementById('latestExpDays').textContent   = String(EXP_DAYS);
-      document.getElementById('latestLotNumber').textContent = latestLotNumber; // or PREFIX + serialForDate(latest)
-      document.getElementById('producto').textContent = PRODUCTO;
-      document.getElementById('origen').textContent   = ORIGEN;
-      document.getElementById('lote').textContent     = LOTE;
-      document.getElementById('usado').textContent    = USADO;
-      document.getElementById('chef').textContent     = CHEF;
-
-      // Histórico rows
-      const tbody  = document.getElementById('tbody');
-      const series = buildDateSeriesDynamic(latest, cfg);
-
-      series.forEach(dateObj => {
-        const expDate = addDays(dateObj, EXP_DAYS);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="nowrap">${fmtESdate(dateObj)}</td>
-          <td class="nowrap">${fmtESdate(expDate)}</td>
-          <td class="nowrap">${String(EXP_DAYS)}</td>
-          <td class="nowrap">${PREFIX}${serialForDate(dateObj)}</td>
-          <td>${PRODUCTO}</td>
-          <td>${ORIGEN}</td>
-          <td>${LOTE}</td>
-          <td>${USADO}</td>
-          <td>${CHEF}</td>
-        `;
+      const tbody=document.getElementById('tbody');
+      const series=buildSeries(latest,cfg);
+      series.forEach(d=>{
+        const expd=addDays(d,cfg.EXP_DAYS);
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${fmtES.format(d)}</td><td>${fmtES.format(expd)}</td>
+          <td>${cfg.EXP_DAYS}</td><td>${cfg.PREFIX}${Math.floor((d-0)/86400000)}</td>
+          <td>${cfg.PRODUCTO}</td><td>${cfg.ORIGEN}</td><td>${cfg.LOTE}</td>
+          <td>${cfg.USADO}</td><td>${cfg.CHEF}</td>`;
         tbody.appendChild(tr);
       });
     }
 
-    /* ---------------------
-       App boot + UI actions
-       --------------------- */
-    function boot() {
-      const CONFIGS = window.B05_CONFIGS || {};
-      const KEY = getKeyFromUrl();
-      const CONFIG = KEY ? CONFIGS[KEY] : null;
-
-      try {
-        const keys = Object.keys(CONFIGS);
-        if (!keys.length) {
-          renderError('No se pudo cargar config.js',
-            '<p>Revise que <code>/food/config.js</code> existe y no tenga errores de sintaxis.</p><p>Fuerce refresco: <code>Ctrl+F5</code> (Windows) o <code>⌘⇧R</code> (Mac).</p>');
-        } else if (!KEY) {
-          renderLanding(keys);
-        } else if (!CONFIG) {
-          renderError('Clave no encontrada',
-            `<p>No existe la clave <code>${KEY}</code> en <code>config.js</code>.</p><p>Claves disponibles: <code>${keys.join(', ')}</code></p>`);
-        } else {
-          renderTraceability(CONFIG);
-        }
-      } catch (e) {
-        renderError('Error de ejecución', `<pre>${(e && e.stack) || e}</pre>`);
-        console.error(e);
-      }
-
-      // Header buttons (keep user on page)
-      document.getElementById('closeBtn').onclick  = () => history.pushState({}, '', '/food/');
-      document.getElementById('printBtn').onclick  = () => window.print();
-      document.getElementById('exportPdfBtn').onclick = () => window.print();
-      document.getElementById('exportCsvBtn').onclick = () => {
-        const body = document.querySelector('table[aria-label="Histórico de lotes"] tbody');
-        if (!body) return;
-        const rows = [[
-          "Date",
-          "Expiration Date",
-          "Duration (Days)",
-          "Lot #",
-          "Product / Ingredients",
-          "Origin / Supplier",
-          "Lot / Batch",
-          "Used in",
-          "Prepared by"
-        ]];
-        [...body.querySelectorAll('tr')].forEach(tr => {
-          const cells = [...tr.children].map(td => '"' + (td.textContent || '').replaceAll('"','""') + '"');
-          rows.push(cells);
-        });
-        const csv = rows.map(r => r.join(',')).join('\n');
-        const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const safeName = (document.getElementById('title').textContent || 'producto').toLowerCase().replaceAll(' ', '_');
-        a.href = url; a.download = `B05_traceability_${safeName}_6m.csv`; a.click();
-        URL.revokeObjectURL(url);
-      };
+    function renderLanding(){
+      const app=document.getElementById('app');
+      const keys=Object.keys(window.B05_CONFIGS||{});
+      app.innerHTML=`<div class="card"><h3>Escanee un código QR del producto</h3>
+      <p><strong>Claves disponibles:</strong></p><ul>${keys.map(k=>`<li><a href="/food/${k}">${k}</a></li>`).join('')}</ul></div>`;
     }
 
-    // Dynamically load config.js (with cache-buster) and then boot
-    (function(){
-      const s = document.createElement('script');
-      s.src = '/food/config.js?v=' + Date.now();
-      s.onload = boot;
-      s.onerror = function(){
-        renderError('No se pudo cargar config.js', '<p>Compruebe la ruta <code>/food/config.js</code> y que el archivo es válido.</p>');
-      };
-      document.head.appendChild(s);
-    })();
+    function boot(){
+      const key=getKeyFromUrl();
+      const cfg=(window.B05_CONFIGS||{})[key];
+      if(!key) return renderLanding();
+      if(!cfg) return document.getElementById('app').innerHTML='<div class="card">No encontrado</div>';
+      renderTrace(cfg);
+    }
+
+    // Load config then boot
+    const s=document.createElement('script');
+    s.src='/food/config.js?v='+Date.now();
+    s.onload=boot;
+    document.head.appendChild(s);
   </script>
 </body>
 </html>
