@@ -36,7 +36,7 @@ window.B05_CONFIGS = {
     LOTE: "Berenjena L610, Tahini L130",
     USADO: "Baba Ghanoush",
     CHEF: "Chef B05",
-    EXP_DAYS: 5,
+    EXP_DAYS: 7,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 10,
     PROD_ANCHOR: "2025-09-10"
