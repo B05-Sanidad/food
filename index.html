@@ -15,11 +15,11 @@
     main { padding:1rem 1.5rem 3rem; flex-grow:1; }
     .card { background:#fff; border-radius:1rem; box-shadow:0 8px 30px rgba(0,0,0,.06); max-width:1100px; margin:0 auto; padding:1rem; overflow-x:auto; }
     h3 { margin:.5rem 0; color:#334155; }
-    table { width:100%; border-collapse:collapse; font-size:.85rem; margin-top:.5rem; }
+    table { width:100%; border-collapse:collapse; font-size:.9rem; margin-top:.5rem; }
     th, td { padding:.6rem .75rem; text-align:left; border-bottom:1px solid #e2e8f0; vertical-align:top; }
     th { background:#fafafa; font-weight:700; color:#475569; }
     .nowrap { white-space:nowrap; }
-    #latestLotDate, #latestExpDate { color:red; font-weight:600; }
+    #latestLotDate, #latestExpDate { color:#dc2626; font-weight:700; }
   </style>
 </head>
 <body>
@@ -155,7 +155,6 @@
       renderTrace(cfg);
     }
 
-    // Load config then boot
     const s=document.createElement('script');
     s.src='/food/config.js?v='+Date.now();
     s.onload=boot;
