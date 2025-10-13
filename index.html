@@ -16,6 +16,11 @@
     • Loads /food/config.js (pure data) and renders
       the "Último lote" and "Histórico" tables.
 
+    CHANGE IN THIS VERSION
+    ----------------------
+    • Added a new column **Duración (Días)** before **Lote #** in BOTH tables.
+      It shows the numeric value of EXP_DAYS from config.js.
+
     CONFIG FIELDS (per item in config.js)
     -------------------------------------
       Food            : String – Product name, used in page title
@@ -44,7 +49,7 @@
     -------------
       1) Upload this file as /food/index.html
       2) Also upload a copy as  /food/404.html  (same content)
-      3) Upload /food/config.js (see the commented template we provide).
+      3) Upload /food/config.js (pure data)
       4) Visit /food/ or /food/<KEY>
 
     =============================================
@@ -262,6 +267,7 @@
               <tr>
                 <th>Fecha</th>
                 <th>Caducidad</th>
+                <th>Duración (Días)</th>
                 <th>Lote #</th>
                 <th>Producto / Ingredientes</th>
                 <th>Origen / Proveedor</th>
@@ -274,6 +280,7 @@
               <tr>
                 <td class="nowrap" id="latestLotDate"></td>
                 <td class="nowrap" id="latestExpDate"></td>
+                <td class="nowrap" id="latestExpDays"></td>
                 <td class="nowrap" id="latestLotNumber"></td>
                 <td id="producto"></td>
                 <td id="origen"></td>
@@ -290,6 +297,7 @@
               <tr>
                 <th>Fecha</th>
                 <th>Caducidad</th>
+                <th>Duración (Días)</th>
                 <th>Lote #</th>
                 <th>Producto / Ingredientes</th>
                 <th>Origen / Proveedor</th>
@@ -309,6 +317,7 @@
 
       document.getElementById('latestLotDate').textContent   = fmtESdate(latest);
       document.getElementById('latestExpDate').textContent   = fmtESdate(exp);
+      document.getElementById('latestExpDays').textContent   = String(EXP_DAYS);
       document.getElementById('latestLotNumber').textContent = latestLotNumber; // or PREFIX + serialForDate(latest)
       document.getElementById('producto').textContent = PRODUCTO;
       document.getElementById('origen').textContent   = ORIGEN;
@@ -326,6 +335,7 @@
         tr.innerHTML = `
           <td class="nowrap">${fmtESdate(dateObj)}</td>
           <td class="nowrap">${fmtESdate(expDate)}</td>
+          <td class="nowrap">${String(EXP_DAYS)}</td>
           <td class="nowrap">${PREFIX}${serialForDate(dateObj)}</td>
           <td>${PRODUCTO}</td>
           <td>${ORIGEN}</td>
@@ -370,7 +380,17 @@
       document.getElementById('exportCsvBtn').onclick = () => {
         const body = document.querySelector('table[aria-label="Histórico de lotes"] tbody');
         if (!body) return;
-        const rows = [["Date","Expiration Date","Lot #","Product / Ingredients","Origin / Supplier","Lot / Batch","Used in","Prepared by"]];
+        const rows = [[
+          "Date",
+          "Expiration Date",
+          "Duration (Days)",
+          "Lot #",
+          "Product / Ingredients",
+          "Origin / Supplier",
+          "Lot / Batch",
+          "Used in",
+          "Prepared by"
+        ]];
         [...body.querySelectorAll('tr')].forEach(tr => {
           const cells = [...tr.children].map(td => '"' + (td.textContent || '').replaceAll('"','""') + '"');
           rows.push(cells);

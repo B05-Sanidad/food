@@ -125,9 +125,9 @@ window.B05_CONFIGS = {
     LOTE: "CARNE ESP MAKRO, Especias L440",
     USADO: "BBQ CARNE",
     CHEF: "Chef B05",
-    EXP_DAYS: 35,
+    EXP_DAYS: 30,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 30,
+    DAYS_PRODUCTION: 35,
     PROD_ANCHOR: "2025-10-10"
   }, 
   "9KEB345": {
@@ -146,10 +146,10 @@ window.B05_CONFIGS = {
   }, 
 
   "12FAL215": {
-    Food: "KEBBE",
+    Food: "FALAFEL",
     PREFIX: "12-FAL-",
     latestLotNumber: "12-FAL-215",
-    PRODUCTO: "Carne de ternera magra, bulgur (trigo partido fino), cebolla, piñones",
+  PRODUCTO: "Garbanzos secos, perejil, cilantro, cebolla, ajo, comino, cilantro molido, sal, pimienta, bicarbonato, aceite de girasol",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "CARNE - KEBBE , Especias L440",
     USADO: "KEBBE",
@@ -169,9 +169,9 @@ window.B05_CONFIGS = {
     LOTE: "Queso Makro , Especias L440",
     USADO: "RAKA",
     CHEF: "Chef B05",
-    EXP_DAYS: 40,
+    EXP_DAYS: 45,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 45,
+    DAYS_PRODUCTION: 40,
     PROD_ANCHOR: "2025-10-10"
   }, 
    
@@ -184,9 +184,9 @@ window.B05_CONFIGS = {
     LOTE: "Queso Makro , Especias L440",
     USADO: "SAMB-QUESO",
     CHEF: "Chef B05",
-    EXP_DAYS: 40,
+    EXP_DAYS: 60,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 45,
+    DAYS_PRODUCTION: 40,
     PROD_ANCHOR: "2025-10-10"
   }, 
 
@@ -199,7 +199,7 @@ window.B05_CONFIGS = {
     LOTE: "Carne Makro , Especias L440",
     USADO: "SAM-CARNE",
     CHEF: "Chef B05",
-    EXP_DAYS: 40,
+    EXP_DAYS: 60,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 45,
     PROD_ANCHOR: "2025-10-10"
@@ -214,24 +214,9 @@ window.B05_CONFIGS = {
     LOTE: "espinacas , Especias L440",
     USADO: "FATAYER",
     CHEF: "Chef B05",
-    EXP_DAYS: 40,
+    EXP_DAYS: 60,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 45,
-    PROD_ANCHOR: "2025-10-10"
-  },
-
-  "19SHP533": {
-    Food: "SHAWARMA POLLO",
-    PREFIX: "19-SHP-",
-    latestLotNumber: "19-SHP-533",
-    PRODUCTO: "Pechuga de pollo, yogur, vinagre, limón, aceite de oliva, ajo, especias, cebolla, sal",
-    ORIGEN: "Makro / Oasis / Consum",
-    LOTE: "Pollo L7022, Especias L440",
-    USADO: "Shawarma Pollo",
-    CHEF: "Chef B05",
-    EXP_DAYS: 12,
-    MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 14,
     PROD_ANCHOR: "2025-10-10"
   }
 };
