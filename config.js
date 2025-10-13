@@ -190,7 +190,7 @@ window.B05_CONFIGS = {
     PROD_ANCHOR: "2025-10-10"
   }, 
 
-  "51SAQ234": {
+  "51SAC234": {
     Food: "SAMB-CARNE",
     PREFIX: "51-SAC-",
     latestLotNumber: "51-SAC-234",
