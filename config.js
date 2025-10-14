@@ -86,6 +86,23 @@ window.B05_CONFIGS = {
     DAYS_PRODUCTION: 10,
     PROD_ANCHOR: "2025-10-10"
   },
+
+    "17SHC533": {
+    Food: "SHAWARMA POLLO",
+    PREFIX: "17-SHC544-",
+    latestLotNumber: "17-SHC-544",
+    PRODUCTO: "Pollo, tomate, yogur, vinagre,limón, especias, ajo, sal",
+    ORIGEN: "Makro / Oasis / Consum",
+    LOTE: "Pollo MAkro, Esp Oasis Oasis",
+    USADO: "Sh. Pollo",
+    CHEF: "Chef B05",
+    EXP_DAYS: 12,
+    MONTHS_BACK: 6,
+    DAYS_PRODUCTION: 10,
+    PROD_ANCHOR: "2025-10-10"
+  },
+
+
   "23BQP533": {
     Food: "BBQ POLLO",
     PREFIX: "23-SHP-",
@@ -137,7 +154,7 @@ window.B05_CONFIGS = {
   PRODUCTO: "Garbanzos secos, perejil, cilantro, cebolla, bicarbonato, aceite de girasol",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "CARNE - KEBBE , Especias L440",
-    USADO: "KEBBE",
+    USADO: "FALAFEL",
     CHEF: "Chef B05",
     EXP_DAYS: 40,
     MONTHS_BACK: 6,
@@ -160,8 +177,6 @@ window.B05_CONFIGS = {
     PROD_ANCHOR: "2025-10-10"
   }, 
 
-
-   
    "51SAQ423": {
     Food: "SAMB-QUESO",
     PREFIX: "51-SAQ-",
@@ -180,10 +195,10 @@ window.B05_CONFIGS = {
     Food: "KAFTA",
     PREFIX: "22-BQK-",
     latestLotNumber: "22-BQK-543",
-    PRODUCTO: "carne de vacuno, cebolla, perejil, sal, especias",
+    PRODUCTO: "Carne de vacuno, cebolla, perejil, sal, especias",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "carne Makro , Especias Oasis",
-    USADO: "SAMB-QUESO",
+    USADO: "KAFTA",
     CHEF: "Chef B05",
     EXP_DAYS: 60,
     MONTHS_BACK: 6,
