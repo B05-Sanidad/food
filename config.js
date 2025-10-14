@@ -125,9 +125,9 @@ window.B05_CONFIGS = {
     LOTE: "CARNE ESP MAKRO, Especias L440",
     USADO: "BBQ CARNE",
     CHEF: "Chef B05",
-    EXP_DAYS: 30,
+    EXP_DAYS: 35,
     MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 35,
+    DAYS_PRODUCTION: 30,
     PROD_ANCHOR: "2025-10-10"
   }, 
   "9KEB345": {
