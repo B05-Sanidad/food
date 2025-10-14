@@ -180,7 +180,7 @@ window.B05_CONFIGS = {
     Food: "KAFTA",
     PREFIX: "22-BQK-",
     latestLotNumber: "22-BQK-543",
-    PRODUCTO: "carne de vacuno, cebolla, perejil, sal, especias"
+    PRODUCTO: "carne de vacuno, cebolla, perejil, sal, especias",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "carne Makro , Especias Oasis",
     USADO: "SAMB-QUESO",
