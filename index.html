@@ -38,10 +38,15 @@
     const fmtES = new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
     const atNoon=d=>{const x=new Date(d);x.setHours(12,0,0,0);return x;}
     const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+    const pad=n=>String(n).padStart(2,'0');
     const qs = new URLSearchParams(location.search);
 
+    function yyyymmdd(d){
+      return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
+    }
+
     function getKeyFromUrl(){
-      const parts = location.pathname.split('/').filter(Boolean); // ["food"] or ["food","KEY"]
+      const parts = location.pathname.split('/').filter(Boolean);
       let key = (parts[0]==='food' && parts[1]) ? decodeURIComponent(parts[1]).toUpperCase() : '';
       if (qs.get('item')) key = qs.get('item').toUpperCase();
       if (['','FOOD','404','404.HTML','INDEX.HTML'].includes(key)) key = '';
@@ -54,38 +59,45 @@
       return atNoon(new Date(Y,M-1,D));
     }
 
+    // Return most recent planned production date, anchored and stepped
     function mostRecentProduction(ref,cfg){
       const step = Number(cfg.DAYS_PRODUCTION);
-      const safeStep = Number.isFinite(step) && step>0 ? step : 7; // avoid 0/NaN -> infinite loops
+      const safeStep = Number.isFinite(step) && step>0 ? step : 7;
       const anchor = cfg.PROD_ANCHOR ? parseISODate(cfg.PROD_ANCHOR) : parseISODate('2025-01-01');
       const msPerDay=86400000;
       const daysFromAnchor=Math.floor((atNoon(ref)-anchor)/msPerDay);
       const k=Math.floor(daysFromAnchor/safeStep);
       let d=addDays(anchor,k*safeStep);
-      if(d.getDay()===1) d=addDays(d,-1); // Monday -> Sunday
+      if(d.getDay()===1) d=addDays(d,-1); // Monday -> Sunday shift
       return atNoon(d);
     }
 
+    // Build historical dates EXCLUDING the latest one to avoid duplication
     function buildSeries(latest,cfg){
       const monthsBack = Number(cfg.MONTHS_BACK)||6;
       const stepRaw = Number(cfg.DAYS_PRODUCTION);
       const step = Number.isFinite(stepRaw)&&stepRaw>0 ? stepRaw : 7;
       const start = new Date(latest); start.setMonth(start.getMonth()-monthsBack);
       const arr=[];
-      for(let d=new Date(latest); d>=start; d=addDays(d,-step)){
+      for(let d=addDays(latest,-step); d>=start; d=addDays(d,-step)){
         let dd=new Date(d);
         if(dd.getDay()===1) dd=addDays(dd,-1);
         arr.push(atNoon(dd));
-        if (arr.length>2000) break; // hard-guard to avoid runaway
+        if (arr.length>2000) break;
       }
       return arr;
+    }
+
+    function makeLotNumberFromDate(prefix, d){
+      // Deterministic, unique per date: PREFIX + YYYYMMDD (e.g., 11-BER-20251010)
+      return (prefix||'') + yyyymmdd(d);
     }
 
     function renderLanding(){
       const app=document.getElementById('app');
       const keys=Object.keys(window.B05_CONFIGS||{});
       app.innerHTML=`<div class="card"><h3>Escanee un código QR del producto</h3>
-      <p><strong>Claves disponibles:</strong></p><ul>${keys.map(k=>`<li><a href="/food/${k}">${k}</a></li>`).join('')}</ul></div>`;
+      <p><strong>Claves disponibles:</strong></p><ul>${keys.map(k=>`<li><a href="?item=${encodeURIComponent(k)}">${k}</a></li>`).join('')}</ul></div>`;
     }
 
     function renderTrace(cfg){
@@ -130,29 +142,35 @@
       document.getElementById('latestLotDate').textContent=fmtES.format(latest);
       document.getElementById('latestExpDate').textContent=fmtES.format(exp);
       document.getElementById('latestExpDays').textContent=cfg.EXP_DAYS;
-      document.getElementById('latestLotNumber').textContent=cfg.latestLotNumber;
+      // Prefer explicit latest lot number if supplied, else derive from date
+      const latestLotNum = cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest);
+      document.getElementById('latestLotNumber').textContent=latestLotNum;
       document.getElementById('producto').textContent=cfg.PRODUCTO;
       document.getElementById('origen').textContent=cfg.ORIGEN;
       document.getElementById('lote').textContent=cfg.LOTE;
       document.getElementById('usado').textContent=cfg.USADO;
       document.getElementById('chef').textContent=cfg.CHEF;
 
+      // Historical rows (exclude latest date)
       const tbody=document.getElementById('tbody');
       const series=buildSeries(latest,cfg);
-      series.forEach(d=>{
+      series.forEach((d)=>{
         const expd=addDays(d,cfg.EXP_DAYS);
+        const lotNum = makeLotNumberFromDate(cfg.PREFIX, d);
         const tr=document.createElement('tr');
         tr.innerHTML=`<td>${fmtES.format(d)}</td><td>${fmtES.format(expd)}</td>
-          <td>${cfg.EXP_DAYS}</td><td>${cfg.PREFIX}${Math.floor((d-0)/86400000)}</td>
+          <td>${cfg.EXP_DAYS}</td><td>${lotNum}</td>
           <td>${cfg.PRODUCTO}</td><td>${cfg.ORIGEN}</td><td>${cfg.LOTE}</td>
           <td>${cfg.USADO}</td><td>${cfg.CHEF}</td>`;
         tbody.appendChild(tr);
       });
     }
 
-    // ---- Wire buttons ONCE (no re-binding) ----
-    document.getElementById('printBtn').addEventListener('click', ()=> window.print(), {once:false});
-    document.getElementById('closeBtn').addEventListener('click', ()=> { location.href = '/food/'; });
+    // ---- Buttons ----
+    document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+    document.getElementById('closeBtn').addEventListener('click', ()=> {
+      if (document.referrer) history.back(); else location.href = location.origin || '.';
+    });
     document.getElementById('exportCsvBtn').addEventListener('click', ()=> {
       const rows = [[
         "Date","Expiration Date","Duration (Days)","Lot #",
@@ -187,9 +205,9 @@
       renderTrace(cfg);
     }
 
-    // Load config then boot
+    // Load config then boot (relative path so it works locally)
     const s=document.createElement('script');
-    s.src='/food/config.js?v='+Date.now();
+    s.src='config.js?v='+Date.now();
     s.onload=boot;
     s.onerror=()=>{ document.getElementById('app').innerHTML='<div class="card">No se pudo cargar config.js</div>'; };
     document.head.appendChild(s);
