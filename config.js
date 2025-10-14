@@ -87,10 +87,10 @@ window.B05_CONFIGS = {
     PROD_ANCHOR: "2025-10-10"
   },
 
-    "17SHP533": {
+    "19SHP533": {
     Food: "SHAWARMA POLLO",
-    PREFIX: "17-SHP-",
-    latestLotNumber: "17-SHP-533",
+    PREFIX: "19-SHP-",
+    latestLotNumber: "19-SHP-533",
     PRODUCTO: "Pollo, tomate, yogur, vinagre,limón, especias, ajo, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Pollo Makro, Esp Oasis",
