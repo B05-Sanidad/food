@@ -13,19 +13,27 @@
     .btn { border-radius:.6rem; padding:.45rem .85rem; font-weight:600; cursor:pointer; border:1px solid #e5e7eb; background:#fff; }
     .btn-brand { background:var(--brand); color:#fff; border-color:var(--brand); }
     main { padding:1rem 1.5rem 3rem; flex-grow:1; }
-    .card { background:#fff; border-radius:1rem; box-shadow:0 8px 30px rgba(0,0,0,.06); max-width:1100px; margin:0 auto; padding:1rem; overflow-x:auto; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 8px 30px rgba(0,0,0,.06); max-width:1200px; margin:0 auto; padding:1rem; overflow-x:auto; }
     h3 { margin:.5rem 0; color:#334155; }
     table { width:100%; border-collapse:collapse; font-size:.9rem; margin-top:.5rem; }
     th, td { padding:.6rem .75rem; text-align:left; border-bottom:1px solid #e2e8f0; vertical-align:top; }
     th { background:#fafafa; font-weight:700; color:#475569; }
     .nowrap { white-space:nowrap; }
     #latestLotDate, #latestExpDate { color:#dc2626; font-weight:700; }
+    .pill { display:inline-block; padding:.2rem .5rem; border-radius:999px; font-size:.75rem; font-weight:700; }
+    .ok { background:#ecfdf5; color:#065f46; }
+    .warn { background:#fffbeb; color:#92400e; }
+    .bad { background:#fef2f2; color:#991b1b; }
+    .row-actions a { text-decoration:none; }
+    .toolbar { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+    .toolbar .spacer { flex:1; }
+    .muted { color:#64748b; }
   </style>
 </head>
 <body>
   <header>
     <h1 id="title">B05 – Trazabilidad</h1>
-    <div>
+    <div class="toolbar">
       <button id="closeBtn" class="btn btn-brand" type="button">❌ Cerrar</button>
       <button id="exportCsvBtn" class="btn" type="button">⬇️ Exportar CSV</button>
       <button id="printBtn" class="btn" type="button">🖨️ Imprimir</button>
@@ -45,18 +53,26 @@
       return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
     }
 
-    function getKeyFromUrl(){
-      const parts = location.pathname.split('/').filter(Boolean);
-      let key = (parts[0]==='food' && parts[1]) ? decodeURIComponent(parts[1]).toUpperCase() : '';
-      if (qs.get('item')) key = qs.get('item').toUpperCase();
-      if (['','FOOD','404','404.HTML','INDEX.HTML'].includes(key)) key = '';
-      return key;
-    }
-
     function parseISODate(s){
       const [Y,M,D]=String(s||'').split('-').map(Number);
       if(!Y||!M||!D) return atNoon(new Date(2025,0,1));
       return atNoon(new Date(Y,M-1,D));
+    }
+
+    function getKeyFromUrl(){
+      const parts = location.pathname.split('/').filter(Boolean);
+      const last = parts[parts.length-1] || '';
+      // If the last segment looks like a file (e.g., index.html, index-exp.html), ignore it
+      const looksLikeFile = /\.html?$/i.test(last);
+      let key = '';
+      if (!looksLikeFile && parts[0]==='food' && parts[1]) {
+        key = decodeURIComponent(parts[1]).toUpperCase();
+      }
+      if (qs.get('item')) key = qs.get('item').toUpperCase();
+      // Treat common names as no-key
+      const ignore = new Set(['','FOOD','404','404.HTML','INDEX.HTML','INDEX-EXP.HTML']);
+      if (ignore.has(key)) key = '';
+      return key;
     }
 
     // Return most recent planned production date, anchored and stepped
@@ -93,18 +109,122 @@
       return (prefix||'') + yyyymmdd(d);
     }
 
-    function renderLanding(){
+    function computeLatestLotForCfg(today, cfg){
+      const latest=mostRecentProduction(today,cfg);
+      const exp=addDays(latest,cfg.EXP_DAYS);
+      const lotNum = cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest);
+      const daysLeft = Math.ceil((atNoon(exp) - atNoon(today)) / 86400000);
+      let statusClass='ok', statusText='✅ Fresco';
+      if (daysLeft <= 2 && daysLeft >= 0) { statusClass='warn'; statusText='⚠️ Casi'; }
+      if (daysLeft < 0) { statusClass='bad'; statusText='❌ Caducado'; }
+      return { latest, exp, lotNum, daysLeft, statusClass, statusText };
+    }
+
+    function renderDashboard(){
       const app=document.getElementById('app');
-      const keys=Object.keys(window.B05_CONFIGS||{});
-      app.innerHTML=`<div class="card"><h3>Escanee un código QR del producto</h3>
-      <p><strong>Claves disponibles:</strong></p><ul>${keys.map(k=>`<li><a href="?item=${encodeURIComponent(k)}">${k}</a></li>`).join('')}</ul></div>`;
+      const cfgs = window.B05_CONFIGS||{};
+      const keys = Object.keys(cfgs);
+      const showExpiredOnly = qs.get('view')==='expired';
+
+      const rows = keys.map(k=>{
+        const cfg = cfgs[k];
+        const res = computeLatestLotForCfg(new Date(), cfg);
+        return {
+          key:k, cfg,
+          latest:res.latest, exp:res.exp, lotNum:res.lotNum, daysLeft:res.daysLeft,
+          statusClass:res.statusClass, statusText:res.statusText
+        };
+      }).sort((a,b)=> a.cfg.Food.localeCompare(b.cfg.Food));
+
+      const filtered = showExpiredOnly ? rows.filter(r=>r.daysLeft<0) : rows;
+
+      app.innerHTML = `
+        <div class="card">
+          <div class="toolbar">
+            <h3 style="margin:0">Resumen de productos (último lote calculado)</h3>
+            <span class="spacer"></span>
+            <label class="btn">
+              <input type="checkbox" id="expiredToggle" ${showExpiredOnly?'checked':''} />
+              Mostrar solo caducados
+            </label>
+          </div>
+
+          <table id="dashTable" aria-label="Resumen">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th class="nowrap">Fecha lote</th>
+                <th class="nowrap">Caduca</th>
+                <th class="nowrap">Días restantes</th>
+                <th>Estado</th>
+                <th>Lote #</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(r=>`
+                <tr>
+                  <td><strong>${r.cfg.Food}</strong><div class="muted">${r.key}</div></td>
+                  <td class="nowrap">${fmtES.format(r.latest)}</td>
+                  <td class="nowrap">${fmtES.format(r.exp)}</td>
+                  <td>${r.daysLeft}</td>
+                  <td><span class="pill ${r.statusClass}">${r.statusText}</span></td>
+                  <td class="nowrap">${r.lotNum}</td>
+                  <td class="row-actions">
+                    <a class="btn" href="?item=${encodeURIComponent(r.key)}">🔎 Ver detalle</a>
+                    <a class="btn" href="?view=expired">🚨 Caducados</a>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <p class="muted">* El cálculo usa <em>DAYS_PRODUCTION</em>, <em>PROD_ANCHOR</em> y <em>EXP_DAYS</em> de cada entrada en <code>config.js</code>.</p>
+        </div>
+      `;
+
+      const expiredToggle = document.getElementById('expiredToggle');
+      if (expiredToggle){
+        expiredToggle.addEventListener('change', ()=>{
+          if (expiredToggle.checked) {
+            qs.set('view','expired');
+          } else {
+            qs.delete('view');
+          }
+          location.search = qs.toString();
+        });
+      }
+
+      // Configure CSV export for the dashboard
+      const exportBtn = document.getElementById('exportCsvBtn');
+      exportBtn.onclick = ()=>{
+        const rows = [[
+          "Key","Food","Latest Lot Date","Expiration Date","Days Left","Status","Lot #"
+        ]];
+        filtered.forEach(r=>{
+          rows.push([
+            r.key, r.cfg.Food, fmtES.format(r.latest), fmtES.format(r.exp),
+            String(r.daysLeft), r.statusText, r.lotNum
+          ].map(v=>'"'+String(v).replaceAll('"','""')+'"'));
+        });
+        const csv = rows.map(r=>r.join(',')).join('\\n');
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href=url; a.download = showExpiredOnly ? 'B05_expired_latest_lots.csv' : 'B05_dashboard_latest_lots.csv';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(()=>URL.revokeObjectURL(url), 500);
+      };
     }
 
     function renderTrace(cfg){
       const app=document.getElementById('app');
       app.innerHTML=`
         <div class="card">
-          <h3>Lote más reciente</h3>
+          <div class="toolbar">
+            <h3 style="margin:0">Lote más reciente</h3>
+            <span class="spacer"></span>
+            <a class="btn" href="./">🏠 Resumen</a>
+          </div>
           <table aria-label="Último lote">
             <thead><tr>
               <th>Fecha</th><th>Caducidad</th><th>Duración (Días)</th><th>Lote #</th>
@@ -142,7 +262,6 @@
       document.getElementById('latestLotDate').textContent=fmtES.format(latest);
       document.getElementById('latestExpDate').textContent=fmtES.format(exp);
       document.getElementById('latestExpDays').textContent=cfg.EXP_DAYS;
-      // Prefer explicit latest lot number if supplied, else derive from date
       const latestLotNum = cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest);
       document.getElementById('latestLotNumber').textContent=latestLotNum;
       document.getElementById('producto').textContent=cfg.PRODUCTO;
@@ -171,36 +290,19 @@
     document.getElementById('closeBtn').addEventListener('click', ()=> {
       if (document.referrer) history.back(); else location.href = location.origin || '.';
     });
-    document.getElementById('exportCsvBtn').addEventListener('click', ()=> {
-      const rows = [[
-        "Date","Expiration Date","Duration (Days)","Lot #",
-        "Product / Ingredients","Origin / Supplier","Lot / Batch","Used in","Prepared by"
-      ]];
-      const pushRow = tr => {
-        const cells = [...tr.children].map(td => '"' + (td.textContent||'').replaceAll('"','""') + '"');
-        rows.push(cells);
-      };
-      const latestTr = document.getElementById('latestRow');
-      if (latestTr) pushRow(latestTr);
-      document.querySelectorAll('table[aria-label="Histórico de lotes"] tbody tr').forEach(pushRow);
-
-      const csv = rows.map(r=>r.join(',')).join('\n');
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const safeName = (document.getElementById('title').textContent || 'producto').toLowerCase().replaceAll(' ', '_');
-      a.href = url; a.download = `B05_traceability_${safeName}_with_latest.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(()=>URL.revokeObjectURL(url), 500);
-    });
+    // exportCsvBtn is configured per-view
 
     function boot(){
       const key=getKeyFromUrl();
       const cfg=(window.B05_CONFIGS||{})[key];
-      if(!key) return renderLanding();
-      if(!cfg) return (document.getElementById('app').innerHTML='<div class="card">No encontrado</div>');
+      if(!key){
+        document.getElementById('title').textContent = `B05 – Resumen de Trazabilidad`;
+        return renderDashboard();
+      }
+      if(!cfg){
+        document.getElementById('app').innerHTML='<div class="card">No encontrado</div>';
+        return;
+      }
       document.getElementById('title').textContent = `${cfg.Food} – Registro de Trazabilidad – B05`;
       renderTrace(cfg);
     }
