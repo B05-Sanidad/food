@@ -1,6 +1,20 @@
 (function(){
   'use strict';
 
+  // ---------- Simple error overlay so we never see a blank page ----------
+  window.addEventListener('error', function (e) {
+    const box = document.createElement('pre');
+    box.style.whiteSpace = 'pre-wrap';
+    box.style.background = '#fee2e2';
+    box.style.border = '1px solid #ef4444';
+    box.style.color = '#991b1b';
+    box.style.padding = '10px';
+    box.style.margin = '10px';
+    box.style.fontFamily = 'ui-monospace, SFMono-Regular, Menlo, monospace';
+    box.textContent = 'JS Error: ' + (e.error && e.error.stack ? e.error.stack : e.message);
+    document.body.appendChild(box);
+  });
+
   // ---------- Utilities ----------
   const fmtES = new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
   const atNoon=d=>{const x=new Date(d);x.setHours(12,0,0,0);return x;}
@@ -74,6 +88,27 @@
     return (prefix||'') + yyyymmdd(d);
   }
 
+  function migrateOverrides(cfgs, overrides){
+    let changed = false;
+    Object.keys(cfgs).forEach(key=>{
+      const cfg = cfgs[key];
+      const ov = overrides[key];
+      if (!ov) return;
+      // Always strip any stray lot number override
+      if (ov.latestLotNumberOverride) { delete ov.latestLotNumberOverride; changed = true; }
+      // Remove any history entries equal to latest date (if present)
+      if (Array.isArray(ov.historyExtra) && ov.latestOverrideDateISO){
+        const latestISO = ov.latestOverrideDateISO;
+        const before = ov.historyExtra.length;
+        ov.historyExtra = ov.historyExtra.filter(x => x.dateISO !== latestISO);
+        if (ov.historyExtra.length !== before) changed = true;
+      }
+      overrides[key] = ov;
+    });
+    if (changed) saveOverrides(overrides);
+    return overrides;
+  }
+
   function computeLatestLotForCfg(today, cfg, overridesForKey){
     let latest=mostRecentProduction(today,cfg);
     if (overridesForKey && overridesForKey.latestOverrideDateISO) {
@@ -88,11 +123,11 @@
     return { latest, exp, lotNum, daysLeft, statusClass, statusText };
   }
 
-  // ---------- Views ----------
+  // ---------- Dashboard ----------
   function renderDashboard(){
     const app=document.getElementById('app');
     const cfgs = window.B05_CONFIGS||{};
-    let overrides = loadOverrides(); overrides = migrateOverrides(window.B05_CONFIGS||{}, overrides);
+    let overrides = loadOverrides(); overrides = migrateOverrides(cfgs, overrides);
     const keys = Object.keys(cfgs);
     const showExpiredOnly = qs.get('view')==='expired';
 
@@ -107,28 +142,26 @@
     }).sort((a,b)=> a.cfg.Food.localeCompare(b.cfg.Food));
 
     // Auto-regenerate when entering expired view
-    const filtered = showExpiredOnly ? rows.filter(r=>r.daysLeft<0) : rows;
-    if (showExpiredOnly && filtered.length){
+    const expiredNow = rows.filter(r=>r.daysLeft<0);
+    if (showExpiredOnly && expiredNow.length){
       let changed=false;
-      filtered.forEach(r=>{
+      expiredNow.forEach(r=>{
         if (r.daysLeft<0){
           const step = Number(r.cfg.DAYS_PRODUCTION)>0 ? Number(r.cfg.DAYS_PRODUCTION) : 7;
           let prevLatest = new Date(r.latest);
           let newLatest = new Date(prevLatest);
-
           while (addDays(newLatest, r.cfg.EXP_DAYS) < TODAY) {
             newLatest = addDays(newLatest, step);
             if ((newLatest - prevLatest)/86400000 > 3650) break;
           }
           const ov = overrides[r.key] || { historyExtra: [] };
-          const prevLotNum = makeLotNumberFromDate(cfg.PREFIX, prevLatest);
-        const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
+          const prevLotNum = makeLotNumberFromDate(r.cfg.PREFIX, prevLatest);
+          const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
           if (!already) {
             ov.historyExtra = ov.historyExtra || [];
             ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
           }
           ov.latestOverrideDateISO = ymd(newLatest);
-          // latest lot number stays constant per config; no override
           overrides[r.key] = ov;
           changed=true;
         }
@@ -204,50 +237,40 @@
       });
     }
 
-    // CSV export for current view
-    
-    // Wire per-row "Reset (este)" buttons
+    // Per-row reset
     document.querySelectorAll('.regenBtn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const key = btn.getAttribute('data-key');
-        const cfgs = window.B05_CONFIGS || {};
         const cfg = cfgs[key];
         if (!cfg) return;
-
-        let overrides = loadOverrides(); overrides = migrateOverrides(window.B05_CONFIGS||{}, overrides);
+        let overrides = loadOverrides();
         const res = computeLatestLotForCfg(TODAY, cfg, overrides[key]);
         const step = Number(cfg.DAYS_PRODUCTION)>0 ? Number(cfg.DAYS_PRODUCTION) : 7;
 
         let prevLatest = new Date(res.latest);
         let newLatest = new Date(prevLatest);
-
-        // advance until it's not expired anymore
         while (addDays(newLatest, cfg.EXP_DAYS) < TODAY) {
           newLatest = addDays(newLatest, step);
-          if ((newLatest - prevLatest)/86400000 > 3650) break; // safety
+          if ((newLatest - prevLatest)/86400000 > 3650) break;
         }
 
         const ov = overrides[key] || { historyExtra: [] };
-        const prevLotNum = makeLotNumberFromDate(r.cfg.PREFIX, prevLatest);
-          const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
+        const prevLotNum = makeLotNumberFromDate(cfg.PREFIX, prevLatest);
+        const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
         if (!already) {
           ov.historyExtra = ov.historyExtra || [];
           ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
         }
         ov.latestOverrideDateISO = ymd(newLatest);
-        // latest lot number stays constant per config; no override
         overrides[key] = ov;
         saveOverrides(overrides);
-
-        // Re-render dashboard so user sees updated row immediately
         renderDashboard();
       });
     });
 
-  document.getElementById('exportCsvBtn').onclick = ()=>{
-      const rows = [[
-        "Key","Food","Latest Lot Date","Expiration Date","Days Left","Status","Lot #"
-      ]];
+    // CSV export for current view
+    document.getElementById('exportCsvBtn').onclick = ()=>{
+      const rows = [["Key","Food","Latest Lot Date","Expiration Date","Days Left","Status","Lot #"]];
       finalRows.forEach(r=>{
         rows.push([
           r.key, r.cfg.Food, fmtES.format(r.latest), fmtES.format(r.exp),
@@ -264,6 +287,7 @@
     };
   }
 
+  // ---------- Per-item ----------
   function renderTrace(cfg, key){
     const app=document.getElementById('app');
     app.innerHTML=`
@@ -315,7 +339,6 @@
     document.getElementById('latestLotDate').textContent=fmtES.format(latest);
     document.getElementById('latestExpDate').textContent=fmtES.format(exp);
     document.getElementById('latestExpDays').textContent=cfg.EXP_DAYS;
-    const ov2 = overrides[key];
     const latestLotNum = cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest);
     document.getElementById('latestLotNumber').textContent=latestLotNum;
     document.getElementById('producto').textContent=cfg.PRODUCTO;
@@ -327,7 +350,7 @@
     const regenBtn = document.getElementById('regenOneBtn');
     if (regenBtn){
       regenBtn.addEventListener('click', ()=>{
-        let overrides = loadOverrides(); overrides = migrateOverrides(window.B05_CONFIGS||{}, overrides);
+        let overrides = loadOverrides();
         const res = computeLatestLotForCfg(TODAY, cfg, overrides[key]);
         const step = Number(cfg.DAYS_PRODUCTION)>0 ? Number(cfg.DAYS_PRODUCTION) : 7;
 
@@ -339,22 +362,19 @@
         }
 
         const ov = overrides[key] || { historyExtra: [] };
-        const prevLotNum = makeLotNumberFromDate(r.cfg.PREFIX, prevLatest);
-          const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
+        const prevLotNum = makeLotNumberFromDate(cfg.PREFIX, prevLatest);
+        const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
         if (!already) {
           ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
         }
         ov.latestOverrideDateISO = ymd(newLatest);
-        // latest lot number stays constant per config; no override
         overrides[key] = ov;
         saveOverrides(overrides);
-        // Re-render the same page to reflect changes
         renderTrace(cfg, key);
       });
     }
 
     const tbody=document.getElementById('tbody');
-
     // extra history from overrides (regenerations)
     const ovh = overrides[key];
     if (ovh && Array.isArray(ovh.historyExtra)) {
@@ -387,7 +407,7 @@
     });
   }
 
-  // ---------- Wiring ----------
+  // ---------- Top buttons ----------
   document.getElementById('printBtn').addEventListener('click', ()=> window.print());
   document.getElementById('closeBtn').addEventListener('click', ()=> {
     if (document.referrer) history.back(); else location.href = location.origin || '.';
@@ -397,6 +417,11 @@
   });
 
   function boot(){
+    if (!window.B05_CONFIGS){
+      const app = document.getElementById('app');
+      app.innerHTML = '<div class="card">config.js no cargado o vacío.</div>';
+      return;
+    }
     const key=getKeyFromUrl();
     const cfg=(window.B05_CONFIGS||{})[key];
     if(!key){
