@@ -94,7 +94,7 @@
   function renderDashboard(){
     const app=document.getElementById('app');
     const cfgs = window.B05_CONFIGS||{};
-    const overrides = loadOverrides();
+    let overrides = loadOverrides(); overrides = migrateOverrides(window.B05_CONFIGS||{}, overrides);
     const keys = Object.keys(cfgs);
     const showExpiredOnly = qs.get('view')==='expired';
 
@@ -216,7 +216,7 @@
         const cfg = cfgs[key];
         if (!cfg) return;
 
-        const overrides = loadOverrides();
+        let overrides = loadOverrides(); overrides = migrateOverrides(window.B05_CONFIGS||{}, overrides);
         const res = computeLatestLotForCfg(TODAY, cfg, overrides[key]);
         const step = Number(cfg.DAYS_PRODUCTION)>0 ? Number(cfg.DAYS_PRODUCTION) : 7;
 
@@ -308,7 +308,7 @@
         </table>
       </div>`;
 
-    const overrides = loadOverrides();
+    let overrides = loadOverrides(); overrides = migrateOverrides(window.B05_CONFIGS||{}, overrides);
     let latest=mostRecentProduction(TODAY,cfg);
     if (overrides[key] && overrides[key].latestOverrideDateISO) {
       latest = parseYMD(overrides[key].latestOverrideDateISO);
@@ -318,7 +318,8 @@
     document.getElementById('latestExpDate').textContent=fmtES.format(exp);
     document.getElementById('latestExpDays').textContent=cfg.EXP_DAYS;
     const ov2 = overrides[key];
-    const latestLotNum = (ov2 && ov2.latestLotNumberOverride) ? ov2.latestLotNumberOverride : (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest));
+    let latestLotNum = cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest);
+    if (ov2 && ov2.latestLotNumberOverride) latestLotNum = ov2.latestLotNumberOverride;
     document.getElementById('latestLotNumber').textContent=latestLotNum;
     document.getElementById('producto').textContent=cfg.PRODUCTO;
     document.getElementById('origen').textContent=cfg.ORIGEN;
@@ -329,7 +330,7 @@
     const regenBtn = document.getElementById('regenOneBtn');
     if (regenBtn){
       regenBtn.addEventListener('click', ()=>{
-        const overrides = loadOverrides();
+        let overrides = loadOverrides(); overrides = migrateOverrides(window.B05_CONFIGS||{}, overrides);
         const res = computeLatestLotForCfg(TODAY, cfg, overrides[key]);
         const step = Number(cfg.DAYS_PRODUCTION)>0 ? Number(cfg.DAYS_PRODUCTION) : 7;
 
@@ -360,6 +361,8 @@
     // extra history from overrides (regenerations)
     const ovh = overrides[key];
     if (ovh && Array.isArray(ovh.historyExtra)) {
+      // filter any entry matching latest date
+      ovh.historyExtra = ovh.historyExtra.filter(x => x.dateISO !== ymd(latest));
       ovh.historyExtra.forEach(x=>{
         const d = parseYMD(x.dateISO);
         const expd=addDays(d,cfg.EXP_DAYS);
