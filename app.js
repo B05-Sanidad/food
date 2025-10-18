@@ -184,7 +184,7 @@
                 <td class="nowrap">${r.lotNum}</td>
                 <td class="row-actions">
                   <a class="btn" href="?item=${encodeURIComponent(r.key)}">🔎 Ver detalle</a>
-                  <a class="btn" href="?view=expired">🚨 Caducados</a>
+                  <button class="btn regenBtn" data-key="${r.key}" type="button">🚨 Reset (este)</button>
                 </td>
               </tr>
             `).join('')}
@@ -207,7 +207,46 @@
     }
 
     // CSV export for current view
-    document.getElementById('exportCsvBtn').onclick = ()=>{
+    
+    // Wire per-row "Reset (este)" buttons
+    document.querySelectorAll('.regenBtn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const key = btn.getAttribute('data-key');
+        const cfgs = window.B05_CONFIGS || {};
+        const cfg = cfgs[key];
+        if (!cfg) return;
+
+        const overrides = loadOverrides();
+        const res = computeLatestLotForCfg(TODAY, cfg, overrides[key]);
+        const step = Number(cfg.DAYS_PRODUCTION)>0 ? Number(cfg.DAYS_PRODUCTION) : 7;
+
+        let prevLatest = new Date(res.latest);
+        let newLatest = new Date(prevLatest);
+
+        // advance until it's not expired anymore
+        while (addDays(newLatest, cfg.EXP_DAYS) < TODAY) {
+          newLatest = addDays(newLatest, step);
+          if ((newLatest - prevLatest)/86400000 > 3650) break; // safety
+        }
+
+        const ov = overrides[key] || { historyExtra: [] };
+        const prevLotNum = (ov.latestLotNumberOverride) ? ov.latestLotNumberOverride : (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, prevLatest));
+        const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
+        if (!already) {
+          ov.historyExtra = ov.historyExtra || [];
+          ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
+        }
+        ov.latestOverrideDateISO = ymd(newLatest);
+        ov.latestLotNumberOverride = makeLotNumberFromDate(cfg.PREFIX, newLatest);
+        overrides[key] = ov;
+        saveOverrides(overrides);
+
+        // Re-render dashboard so user sees updated row immediately
+        renderDashboard();
+      });
+    });
+
+  document.getElementById('exportCsvBtn').onclick = ()=>{
       const rows = [[
         "Key","Food","Latest Lot Date","Expiration Date","Days Left","Status","Lot #"
       ]];
@@ -235,6 +274,7 @@
           <h3 style="margin:0">Lote más reciente</h3>
           <span style="flex:1"></span>
           <a class="btn" href="./">🏠 Resumen</a>
+          <button id="regenOneBtn" class="btn" type="button">🚨 Reset este producto</button>
         </div>
         <table aria-label="Último lote">
           <thead><tr>
@@ -285,6 +325,35 @@
     document.getElementById('lote').textContent=cfg.LOTE;
     document.getElementById('usado').textContent=cfg.USADO;
     document.getElementById('chef').textContent=cfg.CHEF;
+
+    const regenBtn = document.getElementById('regenOneBtn');
+    if (regenBtn){
+      regenBtn.addEventListener('click', ()=>{
+        const overrides = loadOverrides();
+        const res = computeLatestLotForCfg(TODAY, cfg, overrides[key]);
+        const step = Number(cfg.DAYS_PRODUCTION)>0 ? Number(cfg.DAYS_PRODUCTION) : 7;
+
+        let prevLatest = new Date(res.latest);
+        let newLatest = new Date(prevLatest);
+        while (addDays(newLatest, cfg.EXP_DAYS) < TODAY) {
+          newLatest = addDays(newLatest, step);
+          if ((newLatest - prevLatest)/86400000 > 3650) break;
+        }
+
+        const ov = overrides[key] || { historyExtra: [] };
+        const prevLotNum = (ov.latestLotNumberOverride) ? ov.latestLotNumberOverride : (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, prevLatest));
+        const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
+        if (!already) {
+          ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
+        }
+        ov.latestOverrideDateISO = ymd(newLatest);
+        ov.latestLotNumberOverride = makeLotNumberFromDate(cfg.PREFIX, newLatest);
+        overrides[key] = ov;
+        saveOverrides(overrides);
+        // Re-render the same page to reflect changes
+        renderTrace(cfg, key);
+      });
+    }
 
     const tbody=document.getElementById('tbody');
 
