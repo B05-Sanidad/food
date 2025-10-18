@@ -80,9 +80,7 @@
       latest = parseYMD(overridesForKey.latestOverrideDateISO);
     }
     const exp=addDays(latest,cfg.EXP_DAYS);
-    const lotNum = (overridesForKey && overridesForKey.latestLotNumberOverride)
-      ? overridesForKey.latestLotNumberOverride
-      : (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest));
+    const lotNum = cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest);
     const daysLeft = Math.ceil((atNoon(exp) - atNoon(today)) / 86400000);
     let statusClass='ok', statusText='✅ Fresco';
     if (daysLeft <= 2 && daysLeft >= 0) { statusClass='warn'; statusText='⚠️ Casi'; }
@@ -130,7 +128,7 @@
             ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
           }
           ov.latestOverrideDateISO = ymd(newLatest);
-          ov.latestLotNumberOverride = ov.latestLotNumberOverride || (r.cfg.latestLotNumber || makeLotNumberFromDate(r.cfg.PREFIX, prevLatest));
+          // latest lot number stays constant per config; no override
           overrides[r.key] = ov;
           changed=true;
         }
@@ -237,7 +235,7 @@
           ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
         }
         ov.latestOverrideDateISO = ymd(newLatest);
-        ov.latestLotNumberOverride = ov.latestLotNumberOverride || (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, prevLatest));
+        // latest lot number stays constant per config; no override
         overrides[key] = ov;
         saveOverrides(overrides);
 
@@ -318,8 +316,7 @@
     document.getElementById('latestExpDate').textContent=fmtES.format(exp);
     document.getElementById('latestExpDays').textContent=cfg.EXP_DAYS;
     const ov2 = overrides[key];
-    let latestLotNum = cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest);
-    if (ov2 && ov2.latestLotNumberOverride) latestLotNum = ov2.latestLotNumberOverride;
+    const latestLotNum = cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, latest);
     document.getElementById('latestLotNumber').textContent=latestLotNum;
     document.getElementById('producto').textContent=cfg.PRODUCTO;
     document.getElementById('origen').textContent=cfg.ORIGEN;
@@ -348,7 +345,7 @@
           ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
         }
         ov.latestOverrideDateISO = ymd(newLatest);
-        ov.latestLotNumberOverride = ov.latestLotNumberOverride || (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, prevLatest));
+        // latest lot number stays constant per config; no override
         overrides[key] = ov;
         saveOverrides(overrides);
         // Re-render the same page to reflect changes
