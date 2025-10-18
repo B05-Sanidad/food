@@ -1,5 +1,5 @@
 (function(){
-  'use strict';
+  'use strict ';
 
   // ---------- Simple error overlay so we never see a blank page ----------
   window.addEventListener('error', function (e) {
