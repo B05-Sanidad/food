@@ -123,14 +123,14 @@
             if ((newLatest - prevLatest)/86400000 > 3650) break;
           }
           const ov = overrides[r.key] || { historyExtra: [] };
-          const prevLotNum = (ov.latestLotNumberOverride) ? ov.latestLotNumberOverride : (r.cfg.latestLotNumber || makeLotNumberFromDate(r.cfg.PREFIX, prevLatest));
-          const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
+          const prevLotNum = makeLotNumberFromDate(cfg.PREFIX, prevLatest);
+        const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
           if (!already) {
             ov.historyExtra = ov.historyExtra || [];
             ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
           }
           ov.latestOverrideDateISO = ymd(newLatest);
-          ov.latestLotNumberOverride = makeLotNumberFromDate(r.cfg.PREFIX, newLatest);
+          ov.latestLotNumberOverride = ov.latestLotNumberOverride || (r.cfg.latestLotNumber || makeLotNumberFromDate(r.cfg.PREFIX, prevLatest));
           overrides[r.key] = ov;
           changed=true;
         }
@@ -230,14 +230,14 @@
         }
 
         const ov = overrides[key] || { historyExtra: [] };
-        const prevLotNum = (ov.latestLotNumberOverride) ? ov.latestLotNumberOverride : (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, prevLatest));
-        const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
+        const prevLotNum = makeLotNumberFromDate(r.cfg.PREFIX, prevLatest);
+          const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
         if (!already) {
           ov.historyExtra = ov.historyExtra || [];
           ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
         }
         ov.latestOverrideDateISO = ymd(newLatest);
-        ov.latestLotNumberOverride = makeLotNumberFromDate(cfg.PREFIX, newLatest);
+        ov.latestLotNumberOverride = ov.latestLotNumberOverride || (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, prevLatest));
         overrides[key] = ov;
         saveOverrides(overrides);
 
@@ -341,13 +341,13 @@
         }
 
         const ov = overrides[key] || { historyExtra: [] };
-        const prevLotNum = (ov.latestLotNumberOverride) ? ov.latestLotNumberOverride : (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, prevLatest));
-        const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
+        const prevLotNum = makeLotNumberFromDate(r.cfg.PREFIX, prevLatest);
+          const already = (ov.historyExtra||[]).some(x=>x.dateISO===ymd(prevLatest));
         if (!already) {
           ov.historyExtra.unshift({ dateISO: ymd(prevLatest), lotNum: prevLotNum });
         }
         ov.latestOverrideDateISO = ymd(newLatest);
-        ov.latestLotNumberOverride = makeLotNumberFromDate(cfg.PREFIX, newLatest);
+        ov.latestLotNumberOverride = ov.latestLotNumberOverride || (cfg.latestLotNumber || makeLotNumberFromDate(cfg.PREFIX, prevLatest));
         overrides[key] = ov;
         saveOverrides(overrides);
         // Re-render the same page to reflect changes
