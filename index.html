@@ -14,24 +14,19 @@
     .toolbar { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
     .btn { border-radius:.6rem; padding:.45rem .85rem; font-weight:600; cursor:pointer; border:1px solid #e5e7eb; background:#fff; }
     .btn-brand { background:var(--brand); color:#fff; border-color:var(--brand); }
-    .pill { display:inline-block; padding:.2rem .5rem; border-radius:999px; font-size:.75rem; font-weight:700; }
-    .ok { background:#ecfdf5; color:#065f46; }
-    .warn { background:#fffbeb; color:#92400e; }
-    .bad { background:#fef2f2; color:#991b1b; }
     main { padding:1rem 1.5rem 3rem; flex-grow:1; }
     .card { background:#fff; border-radius:1rem; box-shadow:0 8px 30px rgba(0,0,0,.06); max-width:1200px; margin:0 auto; padding:1rem; overflow-x:auto; }
-    h3 { margin:.5rem 0; color:#334155; }
-    table { width:100%; border-collapse:collapse; font-size:.9rem; margin-top:.5rem; }
-    th, td { padding:.6rem .75rem; text-align:left; border-bottom:1px solid #e2e8f0; vertical-align:top; }
-    th { background:#fafafa; font-weight:700; color:#475569; }
-    .nowrap { white-space:nowrap; }
     .muted { color:#64748b; }
+    #diag { margin: 8px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+    #diag.ok { color:#065f46; }
+    #diag.bad { color:#991b1b; }
+    pre.err { white-space:pre-wrap; background:#fee2e2; border:1px solid #ef4444; color:#991b1b; padding:10px; border-radius:8px; }
   </style>
 </head>
 <body>
   <header>
     <h1 id="title">B05 – Trazabilidad</h1>
-    <div class="toolbar ">
+    <div class="toolbar">
       <a id="homeBtn" class="btn" href="./">🏠 Resumen</a>
       <a id="expiredBtn" class="btn" href="?view=expired">🚨 Caducados</a>
       <button id="exportCsvBtn" class="btn" type="button">⬇️ Exportar CSV</button>
@@ -41,11 +36,24 @@
     </div>
   </header>
 
+  <div id="diag" class="muted">cargando…</div>
   <main id="app"></main>
 
-  <!-- Load config first (user data) -->
-  <script src="config.js"></script>
+  <script>
+    // Global error box
+    window.addEventListener('error', function (e) {
+      const pre = document.createElement('pre');
+      pre.className = 'err';
+      pre.textContent = (e.error && e.error.stack) ? e.error.stack : e.message;
+      document.getElementById('app').prepend(pre);
+      const d = document.getElementById('diag');
+      d.className='bad'; d.textContent = '⚠️ Error en JS — ver recuadro rojo.';
+    });
+  </script>
+
+  <!-- Load config first -->
+  <script src="config.js" defer onload="(function(){var d=document.getElementById('diag');var ok= !!(window.B05_CONFIGS && Object.keys(window.B05_CONFIGS).length); d.className = ok? 'ok' : 'bad'; d.textContent = ok? ('✅ config.js OK – '+Object.keys(window.B05_CONFIGS).length+' items') : '⚠️ config.js cargado pero vacío o sin window.B05_CONFIGS'; })()" onerror="(function(){var d=document.getElementById('diag'); d.className='bad'; d.textContent='❌ No se pudo cargar config.js (404/CORS)'; })()"></script>
   <!-- App logic -->
-  <script src="app.js?v=1.0.3"></script>
+  <script src="app.js?v=1.0.3" defer></script>
 </body>
 </html>
