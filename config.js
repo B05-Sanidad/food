@@ -75,7 +75,7 @@ window.B05_CONFIGS = {
   "17SHC544": {
     Food: "SHAWARMA CARNE",
     PREFIX: "17-SHC544-",
-    latestLotNumber: "17-SHC-544",
+    latestLotNumber: "17-SHC-99999",
     PRODUCTO: "Carne de ternera, cebolla, tomate, yogur, vinagre,limón, especias, ajo, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Carne Makro, Esp Oasis",
