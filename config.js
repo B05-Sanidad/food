@@ -234,5 +234,5 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 40,
     PROD_ANCHOR: "2026-05-10"
-  },
+  }
 };
