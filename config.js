@@ -15,7 +15,7 @@ window.B05_CONFIGS = {
   "5HUM517": {
     Food: "HOMMUS",
     PREFIX: "5-HOM-",
-    latestLotNumber: "5-HOM-517",
+    latestLotNumber: "5-HOM-999",
     PRODUCTO: "Garbanzos cocidos, Tahini, Limón, Aceite de oliva, Ajo, Sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Garbanzos Makro, Tahini Oasis, Aceite Makro",
@@ -87,7 +87,7 @@ window.B05_CONFIGS = {
     PROD_ANCHOR: "2025-10-10"
   },
 
-    "19SHP533": {
+  "19SHP533": {
     Food: "SHAWARMA POLLO",
     PREFIX: "19-SHP-",
     latestLotNumber: "19-SHP-533",
@@ -116,7 +116,7 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 12,
     PROD_ANCHOR: "2025-10-10"
-  }, 
+  },
 
   "25BQC342": {
     Food: "BBQ CARNE",
@@ -131,7 +131,7 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 30,
     PROD_ANCHOR: "2025-10-10"
-  }, 
+  },
   "9KEB345": {
     Food: "KEBBE",
     PREFIX: "9-KEB-",
@@ -145,13 +145,13 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 45,
     PROD_ANCHOR: "2025-10-10"
-  }, 
+  },
 
   "12FAL215": {
     Food: "FALAFEL",
     PREFIX: "12-FAL-",
     latestLotNumber: "12-FAL-215",
-  PRODUCTO: "Garbanzos secos, perejil, cilantro, cebolla, bicarbonato, aceite de girasol",
+    PRODUCTO: "Garbanzos secos, perejil, cilantro, cebolla, bicarbonato, aceite de girasol",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "CARNE - KEBBE , Especias Oasis",
     USADO: "FALAFEL",
@@ -160,7 +160,7 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 45,
     PROD_ANCHOR: "2025-10-10"
-  }, 
+  },
 
   "8RAK934": {
     Food: "RAKA QUESO",
@@ -175,9 +175,9 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 40,
     PROD_ANCHOR: "2025-10-10"
-  }, 
+  },
 
-   "51SAQ423": {
+  "51SAQ423": {
     Food: "SAMB-QUESO",
     PREFIX: "51-SAQ-",
     latestLotNumber: "51-SAQ-423",
@@ -190,8 +190,8 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 40,
     PROD_ANCHOR: "2025-10-10"
-  }, 
-   "22BQK543": {
+  },
+  "22BQK543": {
     Food: "KAFTA",
     PREFIX: "22-BQK-",
     latestLotNumber: "22-BQK-543",
@@ -204,7 +204,7 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 40,
     PROD_ANCHOR: "2025-10-10"
-  }, 
+  },
 
   "51SAC234": {
     Food: "SAMB-CARNE",
@@ -220,8 +220,8 @@ window.B05_CONFIGS = {
     DAYS_PRODUCTION: 45,
     PROD_ANCHOR: "2025-10-10"
   },
- 
- "53FAT243": {
+
+  "53FAT243": {
     Food: "FATAYER",
     PREFIX: "53-FAT-",
     latestLotNumber: "53-FAT-243",
