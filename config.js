@@ -12,10 +12,10 @@
   3) Save the file and hard-refresh the browser.
 */
 window.B05_CONFIGS = {
-  "5HUM517": {
+  "70HUM201": {
     Food: "HOMMUS",
-    PREFIX: "5-HOM-",
-    latestLotNumber: "5-HOM-999",
+    PREFIX: "70-HOM-",
+    latestLotNumber: "70-HOM-201",
     PRODUCTO: "Garbanzos cocidos, Tahini, Limón, Aceite de oliva, Ajo, Sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Garbanzos Makro, Tahini Oasis, Aceite Makro",
@@ -24,13 +24,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 7,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 7,
-    PROD_ANCHOR: "2025-10-01"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "11BER610": {
+  "70BER200": {
     Food: "BERENJENA",
-    PREFIX: "11-BER-",
-    latestLotNumber: "11-BER-610",
+    PREFIX: "70-BER-",
+    latestLotNumber: "70-BER-200",
     PRODUCTO: "Berenjena asada, Ajo, Limón, Tahini, Aceite de oliva, Sal",
     ORIGEN: "Makro / Consum / Oasis",
     LOTE: "Berenjena Oasis, Tahini Oasis",
@@ -39,13 +39,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 7,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 10,
-    PROD_ANCHOR: "2025-09-10"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "29MUH430": {
+  "70MUH202": {
     Food: "MOUHAMMARA",
-    PREFIX: "29-MUH-",
-    latestLotNumber: "29-MUH-430",
+    PREFIX: "70-MUH-",
+    latestLotNumber: "70-MUH-202",
     PRODUCTO: "Pimiento rojo, Nueces, Melaza de granada, Pan rallado, Aceite, Especias, Sal",
     ORIGEN: "Makro / Carrefour / Oasis",
     LOTE: "Pimiento L430, Nueces L221",
@@ -54,13 +54,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 10,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 14,
-    PROD_ANCHOR: "2025-08-15"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "11PAR654": {
+  "70PAR22": {
     Food: "HOJAS DE PARRA",
-    PREFIX: "11-PAR-",
-    latestLotNumber: "11-PAR-654",
+    PREFIX: "70-PAR-",
+    latestLotNumber: "70-PAR-22",
     PRODUCTO: "Hojas de parra cocidas, arroz, tomate, c aceite de oliva, limón, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Hojas de parra Oasis, Arroz L520, Limón L140",
@@ -69,13 +69,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 12,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 10,
-    PROD_ANCHOR: "2025-09-01"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "17SHC544": {
-    Food: "SHAWARMA CARNE",
-    PREFIX: "17-SHC544-",
-    latestLotNumber: "17-SHC-99999",
+  "70TCAR72": {
+    Food: "TIRA CARNE",
+    PREFIX: "70-TCAR-",
+    latestLotNumber: "70-TCAR-72",
     PRODUCTO: "Carne de ternera, cebolla, tomate, yogur, vinagre,limón, especias, ajo, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Carne Makro, Esp Oasis",
@@ -84,13 +84,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 12,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 10,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "19SHP533": {
-    Food: "SHAWARMA POLLO",
-    PREFIX: "19-SHP-",
-    latestLotNumber: "19-SHP-533",
+  "70TPOLLO71": {
+    Food: "TIRA POLLO",
+    PREFIX: "70-TPOLLO-",
+    latestLotNumber: "70-TPOLLO-71",
     PRODUCTO: "Pollo, tomate, yogur, vinagre,limón, especias, ajo, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Pollo Makro, Esp Oasis",
@@ -99,14 +99,14 @@ window.B05_CONFIGS = {
     EXP_DAYS: 12,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 10,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   },
 
 
-  "23BQP865": {
-    Food: "BBQ POLLO",
-    PREFIX: "23-BQP-",
-    latestLotNumber: "23-BQP-865",
+  "70TAOUK50": {
+    Food: "TAOUK POLLO",
+    PREFIX: "70-TAOUK-",
+    latestLotNumber: "70-TAOUK-50",
     PRODUCTO: "Pechuga de pollo, yogur, vinagre, limón, aceite de oliva, ajo, especias, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Pollo Makro, Especias Oasis",
@@ -115,13 +115,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 14,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 12,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "25BQC342": {
-    Food: "BBQ CARNE",
-    PREFIX: "25-BQC-",
-    latestLotNumber: "25-BQC-342",
+  "70MICHC51": {
+    Food: "MICHWI CARNE",
+    PREFIX: "70-MICHC-",
+    latestLotNumber: "70-MICHC-51",
     PRODUCTO: "Carne , yogur, vinagre, limón, aceite de oliva, ajo, especias, cebolla, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "CARNE ESP MAKRO, Especias Oasis",
@@ -130,12 +130,12 @@ window.B05_CONFIGS = {
     EXP_DAYS: 35,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 30,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   },
-  "9KEB345": {
+  "70KEB210": {
     Food: "KEBBE",
-    PREFIX: "9-KEB-",
-    latestLotNumber: "9-KEB-345",
+    PREFIX: "70-KEB-",
+    latestLotNumber: "70-KEB-210",
     PRODUCTO: "Carne de ternera magra, bulgur (trigo partido fino), cebolla, piñones",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "CARNE - KEBBE , Especias Oasis",
@@ -144,13 +144,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 40,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 45,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "12FAL215": {
-    Food: "FALAFEL",
-    PREFIX: "12-FAL-",
-    latestLotNumber: "12-FAL-215",
+  "70FAL207": {
+    Food: "PROD_FALAFEL",
+    PREFIX: "70-FAL-",
+    latestLotNumber: "12-FAL-207",
     PRODUCTO: "Garbanzos secos, perejil, cilantro, cebolla, bicarbonato, aceite de girasol",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "CARNE - KEBBE , Especias Oasis",
@@ -159,13 +159,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 40,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 45,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "8RAK934": {
-    Food: "RAKA QUESO",
-    PREFIX: "8RAK-",
-    latestLotNumber: "8-RAK-934",
+  "70RAK209": {
+    Food: "PROD_RAKA QUESO",
+    PREFIX: "70-RAK-",
+    latestLotNumber: "70-RAK-209",
     PRODUCTO: "Queso blanco, mozzarella, harina de trigo, agua, sal, aceite de girasol",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Queso Makro , Especias Oasis",
@@ -174,13 +174,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 45,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 40,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "51SAQ423": {
-    Food: "SAMB-QUESO",
-    PREFIX: "51-SAQ-",
-    latestLotNumber: "51-SAQ-423",
+  "70SAQ203": {
+    Food: "PROD_SAMB-QUESO",
+    PREFIX: "70-SAQ-",
+    latestLotNumber: "51-SAQ-203",
     PRODUCTO: "Harina de trigo, Queso blanco, mozzarella, harina de trigo, agua, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Queso Makro , Especias Oasis",
@@ -189,27 +189,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 60,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 40,
-    PROD_ANCHOR: "2025-10-10"
-  },
-  "22BQK543": {
-    Food: "KAFTA",
-    PREFIX: "22-BQK-",
-    latestLotNumber: "22-BQK-543",
-    PRODUCTO: "Carne de vacuno, cebolla, perejil, sal, especias",
-    ORIGEN: "Makro / Oasis / Consum",
-    LOTE: "carne Makro , Especias Oasis",
-    USADO: "KAFTA",
-    CHEF: "Chef B05",
-    EXP_DAYS: 60,
-    MONTHS_BACK: 6,
-    DAYS_PRODUCTION: 40,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "51SAC234": {
-    Food: "SAMB-CARNE",
-    PREFIX: "51-SAC-",
-    latestLotNumber: "51-SAC-234",
+  "70SAC204": {
+    Food: "PROD_SAMB-CARNE",
+    PREFIX: "70-SAC-",
+    latestLotNumber: "70-SAC-204",
     PRODUCTO: "Harina de trigo, Carne Ternera, harina de trigo, agua, sal, aceite de girasol",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Carne Makro , Especias OASIS",
@@ -218,13 +204,13 @@ window.B05_CONFIGS = {
     EXP_DAYS: 60,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 45,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   },
 
-  "53FAT243": {
-    Food: "FATAYER",
-    PREFIX: "53-FAT-",
-    latestLotNumber: "53-FAT-243",
+  "70FAT206": {
+    Food: "PROD_FATAYER",
+    PREFIX: "70-FAT-",
+    latestLotNumber: "70-FAT-206",
     PRODUCTO: "Harina de trigo, espinacas frescas, cebolla, limón, sal, pimienta",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "espinacas , Especias Oasis",
@@ -233,6 +219,20 @@ window.B05_CONFIGS = {
     EXP_DAYS: 60,
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 45,
-    PROD_ANCHOR: "2025-10-10"
+    PROD_ANCHOR: "2026-05-10"
   }
+   "70ARROZ63": {
+   Food: "PROD_ARROZ",
+   PREFIX: "70-ARROZ-",
+   latestLotNumber: "70-RICE-63",
+   PRODUCTO: "Arroz , cebolla, perejil, sal, especias",
+   ORIGEN: "Makro / Oasis / Consum",
+   LOTE: "Arroz Oasis , Especias Oasis",
+   USADO: "ARROZ",
+   CHEF: "Chef B05",
+   EXP_DAYS: 60,
+   MONTHS_BACK: 6,
+   DAYS_PRODUCTION: 40,
+   PROD_ANCHOR: "2026-05-10"
+ },
 };
