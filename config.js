@@ -180,7 +180,7 @@ window.B05_CONFIGS = {
   "70SAQ203": {
     Food: "PROD_SAMB-QUESO",
     PREFIX: "70-SAQ-",
-    latestLotNumber: "51-SAQ-203",
+    latestLotNumber: "70-SAQ-203",
     PRODUCTO: "Harina de trigo, Queso blanco, mozzarella, harina de trigo, agua, sal",
     ORIGEN: "Makro / Oasis / Consum",
     LOTE: "Queso Makro , Especias Oasis",
