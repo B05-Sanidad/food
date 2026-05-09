@@ -220,19 +220,19 @@ window.B05_CONFIGS = {
     MONTHS_BACK: 6,
     DAYS_PRODUCTION: 45,
     PROD_ANCHOR: "2026-05-10"
-  }
-   "70ARROZ63": {
-   Food: "PROD_ARROZ",
-   PREFIX: "70-ARROZ-",
-   latestLotNumber: "70-RICE-63",
-   PRODUCTO: "Arroz , cebolla, perejil, sal, especias",
-   ORIGEN: "Makro / Oasis / Consum",
-   LOTE: "Arroz Oasis , Especias Oasis",
-   USADO: "ARROZ",
-   CHEF: "Chef B05",
-   EXP_DAYS: 60,
-   MONTHS_BACK: 6,
-   DAYS_PRODUCTION: 40,
-   PROD_ANCHOR: "2026-05-10"
- },
+  },
+  "70ARROZ63": {
+    Food: "PROD_ARROZ",
+    PREFIX: "70-ARROZ-",
+    latestLotNumber: "70-RICE-63",
+    PRODUCTO: "Arroz , cebolla, perejil, sal, especias",
+    ORIGEN: "Makro / Oasis / Consum",
+    LOTE: "Arroz Oasis , Especias Oasis",
+    USADO: "ARROZ",
+    CHEF: "Chef B05",
+    EXP_DAYS: 60,
+    MONTHS_BACK: 6,
+    DAYS_PRODUCTION: 40,
+    PROD_ANCHOR: "2026-05-10"
+  },
 };
