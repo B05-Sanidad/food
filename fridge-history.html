@@ -132,6 +132,23 @@ function isAfterOpeningTime(now) {
     return now.getHours() > OPENING_HOUR || (now.getHours() === OPENING_HOUR && now.getMinutes() >= OPENING_MINUTE);
 }
 
+function getSyncedEntry() {
+    try {
+        const fromUrl = new URLSearchParams(window.location.search).get("entry");
+        if (fromUrl) {
+            const decoded = JSON.parse(decodeURIComponent(fromUrl));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(decoded));
+            return decoded;
+        }
+
+        const one = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        if (!one || !one.date || !one.type || !one.values) return null;
+        return one;
+    } catch(e) {
+        return null;
+    }
+}
+
 function buildCleaningSchedule(startDate, endDate) {
     const schedule = {};
     let lastCleaningStart = addDays(endDate, -14);
@@ -158,16 +175,6 @@ function buildCleaningSchedule(startDate, endDate) {
     }
 
     return schedule;
-}
-
-function getSyncedEntry() {
-    try {
-        const one = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        if (!one || !one.date || !one.type || !one.values) return null;
-        return one;
-    } catch(e) {
-        return null;
-    }
 }
 
 function buildData() {

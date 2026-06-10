@@ -31,7 +31,7 @@ button, .btn { border:0; border-radius:9px; padding:11px 14px; background:var(--
 <body>
 <header>
     <h1>B05 Fridge & Freezer Entry</h1>
-    <p>One synced entry only — saved in this browser and shown in fridge-history.html</p>
+    <p>One synced entry only — SAVE then press History</p>
 </header>
 
 <div class="wrap">
@@ -58,7 +58,7 @@ button, .btn { border:0; border-radius:9px; padding:11px 14px; background:var(--
         <div class="actions" style="margin-top:12px;">
             <button onclick="saveOneEntry()">SAVE</button>
             <button class="warn" onclick="clearOneEntry()">Clear Entry</button>
-            <a class="btn secondary" href="/food/fridge-history.html">History</a>
+            <button class="secondary btn" onclick="goHistory()">History</button>
         </div>
 
         <div class="saved" id="savedMessage">SAVED</div>
@@ -141,7 +141,7 @@ function setDefaultTemperatures() {
     }
 }
 
-function saveOneEntry() {
+function getCurrentEntry() {
     const entry = {
         date: document.getElementById("entryDate").value,
         type: document.getElementById("entryType").value,
@@ -153,6 +153,11 @@ function saveOneEntry() {
         entry.values[name] = document.getElementById(name.replaceAll(" ","_")).value;
     });
 
+    return entry;
+}
+
+function saveOneEntry() {
+    const entry = getCurrentEntry();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
     document.getElementById("savedMessage").style.display = "block";
     renderPreview();
@@ -162,6 +167,13 @@ function clearOneEntry() {
     localStorage.removeItem(STORAGE_KEY);
     document.getElementById("savedMessage").style.display = "none";
     renderPreview();
+}
+
+function goHistory() {
+    const entry = getCurrentEntry();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
+    const encoded = encodeURIComponent(JSON.stringify(entry));
+    window.location.href = "/food/fridge-history.html?entry=" + encoded;
 }
 
 function renderPreview() {
