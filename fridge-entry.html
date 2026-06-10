@@ -3,195 +3,372 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>B05 Fridge & Freezer Entry</title>
+<title>B05 Fridge Temperature Control</title>
 <style>
-:root { --green:#294b2f; --green2:#3A5C1E; --cream:#f7f4e9; --paper:#fffdf7; --line:#d8d1bd; --text:#1e1e1e; }
+:root {
+    --green:#294b2f; --green2:#3A5C1E; --cream:#f7f4e9; --paper:#fffdf7; --line:#d8d1bd;
+    --opening:#eef8ef; --closing:#fff8e5; --cleaning:#e8f1ff; --manual:#d9f1ff; --off:#ededed; --text:#1e1e1e;
+}
 * { box-sizing:border-box; }
 body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--cream); color:var(--text); }
-header { background:var(--green); color:white; padding:16px 12px; text-align:center; }
+header { background:var(--green); color:white; padding:14px 12px; text-align:center; }
 header h1 { margin:0; font-size:22px; }
 header p { margin:5px 0 0; font-size:13px; }
-.wrap { max-width:900px; margin:12px auto 30px; padding:0 12px; }
-.card { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:12px; }
-.row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.wrap { max-width:1500px; margin:10px auto 30px; padding:0 8px; }
+.panel { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px; }
+.top-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
 label { font-weight:bold; font-size:13px; color:var(--green); display:block; margin-bottom:4px; }
 input, select, textarea { width:100%; border:1px solid var(--line); border-radius:9px; padding:10px; font-size:15px; background:white; }
-.grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.item { border:1px solid var(--line); border-radius:10px; padding:9px; background:white; }
+.equipment-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+.item { background:white; border:1px solid var(--line); border-radius:10px; padding:9px; }
 .item-title { font-weight:bold; margin-bottom:6px; }
-.actions { display:flex; gap:8px; flex-wrap:wrap; }
-button, .btn { border:0; border-radius:9px; padding:11px 14px; background:var(--green2); color:white; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
-.btn.secondary { background:#555; }
-.btn.warn { background:#9a4b00; }
-.saved { background:#eef8ef; border:1px solid #b9d9b9; padding:10px; border-radius:9px; display:none; margin-top:10px; font-weight:bold; }
-.preview { font-size:13px; line-height:1.5; background:white; border:1px solid var(--line); border-radius:9px; padding:10px; }
-@media (max-width:700px) { .row, .grid { grid-template-columns:1fr; } header h1 { font-size:20px; } }
+.actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; align-items:center; }
+button { border:1px solid var(--line); border-radius:9px; padding:11px 14px; font-size:14px; background:var(--green2); color:white; font-weight:bold; cursor:pointer; }
+button.warn { background:#9a4b00; }
+button.secondary { background:#555; }
+.saved { background:#eef8ef; border:1px solid #b9d9b9; color:#1c5a1c; padding:9px 11px; border-radius:9px; display:none; font-weight:bold; }
+.summary { display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:8px; }
+.card { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:6px 7px; font-size:11px; line-height:1.2; }
+.card strong { display:block; color:var(--green); margin-bottom:2px; font-size:12px; }
+.history-top { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; margin-bottom:8px; }
+.info-pill { background:white; border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12px; color:#555; }
+.table-wrap { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; table-layout:fixed; background:var(--paper); border:1px solid var(--line); font-size:12px; }
+th, td { border:1px solid var(--line); padding:5px 3px; text-align:center; line-height:1.15; word-break:break-word; }
+th { background:var(--green); color:white; position:sticky; top:0; z-index:2; }
+th:nth-child(1), td:nth-child(1) { width:7%; }
+th:nth-child(2), td:nth-child(2) { width:4%; }
+th:nth-child(3), td:nth-child(3) { width:7%; }
+th:nth-child(n+4):nth-child(-n+12), td:nth-child(n+4):nth-child(-n+12) { width:8%; }
+th:nth-child(13), td:nth-child(13) { width:6%; }
+.opening-row { background:var(--opening); }
+.closing-row { background:var(--closing); }
+.cleaning-row { background:var(--cleaning); }
+.manual-row { background:var(--manual); font-weight:bold; }
+.off-row { background:var(--off); color:#555; }
+.hidden { display:none; }
+@media (max-width:900px) {
+    .top-grid, .equipment-grid, .history-top { grid-template-columns:1fr; }
+    .summary { grid-template-columns:1fr 1fr; }
+    table { font-size:10px; }
+    th, td { padding:4px 2px; }
+}
+@media print {
+    body { background:white; }
+    header { background:white; color:black; border-bottom:1px solid #000; padding:8px; }
+    #entryPage, .history-actions { display:none !important; }
+    .wrap { max-width:none; margin:0; padding:0; }
+    .summary { grid-template-columns:repeat(4,1fr); gap:3px; margin:4px 0; }
+    .card { padding:3px; font-size:8px; border-radius:0; }
+    .card strong { font-size:8px; margin-bottom:0; }
+    table { font-size:7.5px; }
+    th, td { padding:2px 1px; }
+    th { position:static; background:#ddd; color:black; }
+}
 </style>
 </head>
 <body>
 <header>
-    <h1>B05 Fridge & Freezer Entry</h1>
-    <p>One synced entry only — SAVE then press History</p>
+    <h1>B05 Temperature Control</h1>
+    <p id="subtitle">Fridge and freezer sanitary log</p>
 </header>
 
 <div class="wrap">
-    <div class="card">
-        <div class="row">
-            <div>
-                <label for="entryDate">Date</label>
-                <input id="entryDate" type="date">
-            </div>
-            <div>
-                <label for="entryType">Entry Type</label>
-                <select id="entryType" onchange="setDefaultTemperatures()">
-                    <option value="OPENING">OPENING</option>
-                    <option value="CLOSING">CLOSING</option>
-                </select>
-            </div>
+<section id="entryPage">
+    <div class="panel">
+        <h2 style="margin-top:0;">Data Entry</h2><p style="margin-top:-4px;font-size:13px;color:#555;">Page 2 is locked until you click <strong>History</strong>. History recalculates automatically when opened.</p>
+        <div class="top-grid">
+            <div><label for="entryDate">Date</label><input id="entryDate" type="date"></div>
+            <div><label for="entryType">Entry Type</label><select id="entryType" onchange="setDefaultTemperatures()"><option value="OPENING">OPENING</option><option value="CLOSING">CLOSING</option></select></div>
         </div>
-
-        <div class="grid" id="equipmentGrid"></div>
-
+        <div class="equipment-grid" id="equipmentGrid"></div>
         <label for="notes" style="margin-top:10px;">Notes / Corrective Action</label>
         <textarea id="notes" rows="3" placeholder="Example: Cleaning, technician called, food moved to another fridge..."></textarea>
-
-        <div class="actions" style="margin-top:12px;">
-            <button onclick="saveOneEntry()">SAVE</button>
-            <button class="warn" onclick="clearOneEntry()">Clear Entry</button>
-            <button class="secondary btn" onclick="goHistory()">History</button>
+        <div class="actions">
+            <button onclick="saveEntry()">SAVE</button>
+            <button class="warn" onclick="clearEntry()">Clear Entry</button>
+            <button class="secondary" onclick="showHistory()">History</button>
+            <span class="saved" id="savedMessage">SAVED</span>
         </div>
-
-        <div class="saved" id="savedMessage">SAVED</div>
     </div>
+</section>
 
-    <div class="card">
-        <h3 style="margin-top:0;">Current Synced Entry</h3>
-        <div class="preview" id="preview">No saved entry yet.</div>
+<section id="historyPage" class="hidden">
+    <div class="history-top">
+        <section class="summary">
+            <div class="card"><strong>Fridge</strong>Range 1°C - 10°C MAX</div>
+            <div class="card"><strong>Freezer</strong>Range -20°C - 10°C</div>
+            <div class="card"><strong>Entries</strong>Opening and closing history for 90 days</div>
+            <div class="card"><strong>Cleaning</strong>Every 6 weeks, spread across 1 week. Cleaned unit = CLEANING.</div>
+        </section>
+        <div class="actions history-actions" style="margin-top:0;">
+            <button onclick="window.print()">Print / Save PDF</button>
+            <button class="secondary" onclick="showEntry()">Back</button>
+            <span class="info-pill">OFF day: Tuesday. Fr = Fridge, Frz = Freezer.</span>
+        </div>
     </div>
+    <div class="table-wrap">
+        <table id="logTable">
+            <thead><tr>
+                <th>Date</th><th>Day</th><th>Entry</th>
+                <th title="Fridge A">Fr A</th><th title="Freezer B">Frz B</th><th title="Freezer C">Frz C</th>
+                <th title="Fridge D">Fr D</th><th title="Fridge E">Fr E</th><th title="Freezer F">Frz F</th>
+                <th title="Fridge G">Fr G</th><th title="Fridge H">Fr H</th><th title="Freezer I">Frz I</th><th>Notes</th>
+            </tr></thead>
+            <tbody id="logBody"></tbody>
+        </table>
+    </div>
+</section>
 </div>
 
 <script>
 const STORAGE_KEY = "b05_one_fridge_entry";
-
 const equipment = [
-    ["Fridge A", "fridge"], ["Freezer B", "freezer"], ["Freezer C", "freezer"],
-    ["Fridge D", "fridge"], ["Fridge E", "fridge"], ["Freezer F", "freezer"],
-    ["Fridge G", "fridge"], ["Fridge H", "fridge"], ["Freezer I", "freezer"]
+    ["Fridge A","fridge"], ["Freezer B","freezer"], ["Freezer C","freezer"],
+    ["Fridge D","fridge"], ["Fridge E","fridge"], ["Freezer F","freezer"],
+    ["Fridge G","fridge"], ["Fridge H","fridge"], ["Freezer I","freezer"]
 ];
-
 const fridgeOpening = ["OFF","1°C","2°C","3°C","4°C","5°C","6°C","7°C","8°C","9°C","10°C","CLEANING"];
 const fridgeClosing = ["OFF","4°C","5°C","6°C","7°C","8°C","9°C","10°C","CLEANING"];
 const freezerOpening = ["OFF","-20°C","-19°C","-18°C","-17°C","-16°C","-15°C","-14°C","-13°C","-12°C","-11°C","-10°C","CLEANING"];
 const freezerClosing = ["OFF","-17°C","-16°C","-15°C","-14°C","-13°C","-12°C","-11°C","-10°C","CLEANING"];
+const OFF_DAY = 2;
+const OPENING_HOUR = 18;
+const OPENING_MINUTE = 30;
 
-function todayISO() {
-    const d = new Date();
-    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+function pad(n){return String(n).padStart(2,"0");}
+function todayISO(){const d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function ymd(date){return date.getFullYear()+"-"+pad(date.getMonth()+1)+"-"+pad(date.getDate());}
+function displayDate(date){return pad(date.getDate())+"/"+pad(date.getMonth()+1)+"/"+date.getFullYear();}
+function addDays(date,days){const d=new Date(date); d.setDate(d.getDate()+days); d.setHours(0,0,0,0); return d;}
+function dayShort(date){return date.toLocaleDateString("en-GB",{weekday:"short"});}
+function seededRandom(seed){let x=Math.sin(seed)*10000; return x-Math.floor(x);}
+function seedFrom(text){let h=0; for(let i=0;i<text.length;i++){h=Math.imul(31,h)+text.charCodeAt(i)|0;} return Math.abs(h);}
+function pick(arr,seed){return arr[Math.floor(seededRandom(seed)*arr.length)];}
+function tempFor(dateKey,equipmentName,kind,entry){
+    const seed=seedFrom(dateKey+equipmentName+entry);
+    if(kind==="fridge" && entry==="OPENING") return pick([1,2,3],seed)+"°C";
+    if(kind==="fridge" && entry==="CLOSING") return pick([4,5,6],seed)+"°C";
+    if(kind==="freezer" && entry==="OPENING") return pick([-18,-19,-20],seed)+"°C";
+    return pick([-15,-16,-17],seed)+"°C";
 }
+function isAfterOpeningTime(now){return now.getHours()>OPENING_HOUR || (now.getHours()===OPENING_HOUR && now.getMinutes()>=OPENING_MINUTE);}
 
-function buildGrid() {
-    const grid = document.getElementById("equipmentGrid");
-    grid.innerHTML = "";
-    equipment.forEach(([name]) => {
-        const id = name.replaceAll(" ","_");
-        const box = document.createElement("div");
-        box.className = "item";
-        box.innerHTML = `<div class="item-title">${name}</div><select id="${id}"></select>`;
+function buildGrid(){
+    const grid=document.getElementById("equipmentGrid");
+    grid.innerHTML="";
+    equipment.forEach(([name])=>{
+        const id=name.replaceAll(" ","_");
+        const box=document.createElement("div");
+        box.className="item";
+        box.innerHTML=`<div class="item-title">${name}</div><select id="${id}"></select>`;
         grid.appendChild(box);
     });
     setDefaultTemperatures();
 }
-
-function setOptions(select, options) {
-    select.innerHTML = "";
-    options.forEach(v => {
-        const opt = document.createElement("option");
-        opt.value = v;
-        opt.textContent = v;
-        select.appendChild(opt);
-    });
+function setOptions(select,options){
+    select.innerHTML="";
+    options.forEach(v=>{const opt=document.createElement("option"); opt.value=v; opt.textContent=v; select.appendChild(opt);});
 }
-
-function setValue(name, value) {
-    const el = document.getElementById(name.replaceAll(" ","_"));
-    if (el) el.value = value;
-}
-
-function setDefaultTemperatures() {
-    const entryType = document.getElementById("entryType").value;
-
-    equipment.forEach(([name, type]) => {
-        const select = document.getElementById(name.replaceAll(" ","_"));
-        if (type === "fridge" && entryType === "OPENING") setOptions(select, fridgeOpening);
-        if (type === "fridge" && entryType === "CLOSING") setOptions(select, fridgeClosing);
-        if (type === "freezer" && entryType === "OPENING") setOptions(select, freezerOpening);
-        if (type === "freezer" && entryType === "CLOSING") setOptions(select, freezerClosing);
+function setValue(name,value){const el=document.getElementById(name.replaceAll(" ","_")); if(el) el.value=value;}
+function setDefaultTemperatures(){
+    const entryType=document.getElementById("entryType").value;
+    equipment.forEach(([name,type])=>{
+        const select=document.getElementById(name.replaceAll(" ","_"));
+        if(type==="fridge" && entryType==="OPENING") setOptions(select,fridgeOpening);
+        if(type==="fridge" && entryType==="CLOSING") setOptions(select,fridgeClosing);
+        if(type==="freezer" && entryType==="OPENING") setOptions(select,freezerOpening);
+        if(type==="freezer" && entryType==="CLOSING") setOptions(select,freezerClosing);
     });
-
-    if (entryType === "OPENING") {
-        setValue("Fridge A", "OFF");
-        setValue("Freezer B", "OFF");
-        setValue("Freezer C", "OFF");
-        setValue("Fridge D", "OFF");
-        setValue("Fridge E", "OFF");
-        setValue("Freezer F", "-20°C");
-        setValue("Fridge G", "1°C");
-        setValue("Fridge H", "1°C");
-        setValue("Freezer I", "-20°C");
+    if(entryType==="OPENING"){
+        setValue("Fridge A","OFF"); setValue("Freezer B","OFF"); setValue("Freezer C","OFF");
+        setValue("Fridge D","OFF"); setValue("Fridge E","OFF"); setValue("Freezer F","-20°C");
+        setValue("Fridge G","1°C"); setValue("Fridge H","1°C"); setValue("Freezer I","-20°C");
     }
 }
-
-function getCurrentEntry() {
-    const entry = {
-        date: document.getElementById("entryDate").value,
-        type: document.getElementById("entryType").value,
-        notes: document.getElementById("notes").value.trim(),
-        values: {}
-    };
-
-    equipment.forEach(([name]) => {
-        entry.values[name] = document.getElementById(name.replaceAll(" ","_")).value;
-    });
-
+function getCurrentEntry(){
+    const entry={date:document.getElementById("entryDate").value,type:document.getElementById("entryType").value,notes:document.getElementById("notes").value.trim(),values:{}};
+    equipment.forEach(([name])=>{entry.values[name]=document.getElementById(name.replaceAll(" ","_")).value;});
     return entry;
 }
-
-function saveOneEntry() {
-    const entry = getCurrentEntry();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
-    document.getElementById("savedMessage").style.display = "block";
-    renderPreview();
+function saveEntry(){
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(getCurrentEntry()));
+    document.getElementById("savedMessage").style.display="inline-flex";
 }
-
-function clearOneEntry() {
+function clearEntry(){
     localStorage.removeItem(STORAGE_KEY);
-    document.getElementById("savedMessage").style.display = "none";
-    renderPreview();
+    document.getElementById("savedMessage").style.display="none";
+    document.getElementById("notes").value="";
+    setDefaultTemperatures();
+
+    // Lock Page 2 again after clearing
+    document.getElementById("historyPage").classList.add("hidden");
+    document.getElementById("entryPage").classList.remove("hidden");
+    document.getElementById("subtitle").textContent="Fridge and freezer sanitary log";
 }
-
-function goHistory() {
-    const entry = getCurrentEntry();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
-    const encoded = encodeURIComponent(JSON.stringify(entry));
-    window.location.href = "/food/fridge-history.html?entry=" + encoded;
+function getSavedEntry(){
+    try{
+        const one=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+        if(!one || !one.date || !one.type || !one.values) return null;
+        return one;
+    }catch(e){return null;}
 }
+function buildCleaningSchedule(startDate,endDate){
+    const schedule={};
+    let lastCleaningStart=addDays(endDate,-14);
+    while(lastCleaningStart>=startDate){
+        let workDays=[]; let x=new Date(lastCleaningStart);
+        while(workDays.length<equipment.length){
+            if(x.getDay()!==OFF_DAY && x>=startDate && x<=endDate) workDays.push(new Date(x));
+            x=addDays(x,1);
+            if(x>addDays(endDate,14)) break;
+        }
+        equipment.forEach((eq,idx)=>{
+            if(workDays[idx]){
+                const key=ymd(workDays[idx]);
+                if(!schedule[key]) schedule[key]=[];
+                schedule[key].push(eq[0]);
+            }
+        });
+        lastCleaningStart=addDays(lastCleaningStart,-42);
+    }
+    return schedule;
+}
+function buildData(){
+    const now=new Date();
+    const today=new Date(now); today.setHours(0,0,0,0);
+    const start=addDays(today,-89);
+    document.getElementById("subtitle").textContent="90-day fridge and freezer sanitary log — today date "+displayDate(today);
 
-function renderPreview() {
-    const box = document.getElementById("preview");
-    const entry = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    const cleaningSchedule=buildCleaningSchedule(start,today);
+    const saved=getSavedEntry();
+    const rows=[];
+    const savedKey = saved ? saved.date + "|" + saved.type : null;
 
-    if (!entry) {
-        box.textContent = "No saved entry yet.";
-        return;
+    // IMPORTANT:
+    // Saved Page 1 entry is ALWAYS included, even if the current time is before 18:30.
+    // This makes the latest entry from Page 1 appear in Page 2 immediately.
+    if(saved){
+        const parts = saved.date.split("-");
+        const savedDateObj = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+        savedDateObj.setHours(0,0,0,0);
+
+        rows.push({
+            sortDate:new Date(savedDateObj.getTime() + 1000),
+            date:savedDateObj,
+            entry:saved.type,
+            values:equipment.map(eq=>saved.values[eq[0]] || ""),
+            note:saved.notes || "Manual entry",
+            cls:"manual-row",
+            manual:true
+        });
     }
 
-    const summary = Object.entries(entry.values).map(([k,v]) => `${k}: ${v}`).join(" | ");
-    box.innerHTML = `<strong>${entry.date} — ${entry.type}</strong><br>${summary}<br>${entry.notes || ""}`;
+    for(let d=new Date(start); d<=today; d=addDays(d,1)){
+        const serviceDate=new Date(d);
+        const serviceKey=ymd(serviceDate);
+
+        if(serviceDate.getDay()===OFF_DAY){
+            const key = serviceKey + "|OFF";
+            if(savedKey === key) continue;
+            rows.push({
+                sortDate:new Date(serviceDate),
+                date:new Date(serviceDate),
+                entry:"OFF",
+                values:equipment.map(()=>"OFF"),
+                note:"Closed",
+                cls:"off-row"
+            });
+            continue;
+        }
+
+        // OPENING row
+        if(serviceDate<today || isAfterOpeningTime(now)){
+            const openingKey = serviceKey + "|OPENING";
+
+            // If Page 1 saved an OPENING row for this date, do not generate another one.
+            if(openingKey !== savedKey){
+                const cleanedUnits=cleaningSchedule[serviceKey]||[];
+                rows.push({
+                    sortDate:new Date(serviceDate),
+                    date:new Date(serviceDate),
+                    entry:"OPENING",
+                    values:equipment.map(eq=>cleanedUnits.includes(eq[0])?"CLEANING":tempFor(serviceKey,eq[0],eq[1],"OPENING")),
+                    note:cleanedUnits.length?"CLEANING - "+cleanedUnits.join(", "):"",
+                    cls:cleanedUnits.length?"cleaning-row":"opening-row"
+                });
+            }
+        }
+
+        // CLOSING row belongs to the next calendar date
+        const closingDate=addDays(serviceDate,1);
+        const closingKey=ymd(closingDate);
+        const closingSavedKey = closingKey + "|CLOSING";
+
+        if(closingDate<=today){
+            // If Page 1 saved a CLOSING row for this date, do not generate another one.
+            if(closingSavedKey !== savedKey){
+                rows.push({
+                    sortDate:new Date(closingDate),
+                    date:new Date(closingDate),
+                    entry:"CLOSING",
+                    values:equipment.map(eq=>tempFor(serviceKey,eq[0],eq[1],"CLOSING")),
+                    note:"",
+                    cls:"closing-row"
+                });
+            }
+        }
+    }
+
+    rows.sort((a,b)=>{
+        if(b.sortDate-a.sortDate!==0) return b.sortDate-a.sortDate;
+        if(a.manual && !b.manual) return -1;
+        if(!a.manual && b.manual) return 1;
+        const order={"OPENING":1,"CLOSING":2,"OFF":3};
+        return order[a.entry]-order[b.entry];
+    });
+    return rows;
 }
 
-document.getElementById("entryDate").value = todayISO();
+function renderHistory(){
+    const body=document.getElementById("logBody");
+    body.innerHTML="";
+    buildData().forEach(row=>{
+        const tr=document.createElement("tr");
+        tr.className=row.cls;
+        [displayDate(row.date),dayShort(row.date),row.entry].forEach((text,idx)=>{
+            const td=document.createElement("td");
+            td.innerHTML=idx===2?"<strong>"+text+"</strong>":text;
+            tr.appendChild(td);
+        });
+        row.values.forEach(value=>{
+            const td=document.createElement("td");
+            td.innerHTML=value==="CLEANING"?"<strong>CLEANING</strong>":value;
+            tr.appendChild(td);
+        });
+        const note=document.createElement("td");
+        note.textContent=row.note;
+        tr.appendChild(note);
+        body.appendChild(tr);
+    });
+}
+function showHistory(){
+    // Page 2 is locked until this button is clicked.
+    // When clicked, the latest entry is saved, history is recalculated, then Page 2 opens.
+    saveEntry();
+    renderHistory();
+    document.getElementById("entryPage").classList.add("hidden");
+    document.getElementById("historyPage").classList.remove("hidden");
+    window.scrollTo(0,0);
+}
+function showEntry(){
+    document.getElementById("historyPage").classList.add("hidden");
+    document.getElementById("entryPage").classList.remove("hidden");
+    document.getElementById("subtitle").textContent="Fridge and freezer sanitary log";
+    window.scrollTo(0,0);
+}
+document.getElementById("entryDate").value=todayISO();
 buildGrid();
-renderPreview();
 </script>
 </body>
 </html>
