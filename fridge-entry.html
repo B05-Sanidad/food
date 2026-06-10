@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B05 Fridge & Freezer Entry</title>
+<style>
+:root { --green:#294b2f; --green2:#3A5C1E; --cream:#f7f4e9; --paper:#fffdf7; --line:#d8d1bd; --text:#1e1e1e; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--cream); color:var(--text); }
+header { background:var(--green); color:white; padding:16px 12px; text-align:center; }
+header h1 { margin:0; font-size:22px; }
+header p { margin:5px 0 0; font-size:13px; }
+.wrap { max-width:900px; margin:12px auto 30px; padding:0 12px; }
+.card { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:12px; }
+.row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+label { font-weight:bold; font-size:13px; color:var(--green); display:block; margin-bottom:4px; }
+input, select, textarea { width:100%; border:1px solid var(--line); border-radius:9px; padding:10px; font-size:15px; background:white; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.item { border:1px solid var(--line); border-radius:10px; padding:9px; background:white; }
+.item-title { font-weight:bold; margin-bottom:6px; }
+.actions { display:flex; gap:8px; flex-wrap:wrap; }
+button, .btn { border:0; border-radius:9px; padding:11px 14px; background:var(--green2); color:white; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+.btn.secondary { background:#555; }
+.btn.warn { background:#9a4b00; }
+.saved { background:#eef8ef; border:1px solid #b9d9b9; padding:10px; border-radius:9px; display:none; margin-top:10px; }
+.preview { font-size:13px; line-height:1.5; background:white; border:1px solid var(--line); border-radius:9px; padding:10px; }
+@media (max-width:700px) { .row, .grid { grid-template-columns:1fr; } header h1 { font-size:20px; } }
+</style>
+</head>
+<body>
+<header>
+    <h1>B05 Fridge & Freezer Entry</h1>
+    <p>One synced entry only — shown inside fridge-history.html</p>
+</header>
+
+<div class="wrap">
+    <div class="card">
+        <div class="row">
+            <div>
+                <label for="entryDate">Date</label>
+                <input id="entryDate" type="date">
+            </div>
+            <div>
+                <label for="entryType">Entry Type</label>
+                <select id="entryType" onchange="setDefaultTemperatures()">
+                    <option value="OPENING">OPENING</option>
+                    <option value="CLOSING">CLOSING</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid" id="equipmentGrid"></div>
+
+        <label for="notes" style="margin-top:10px;">Notes / Corrective Action</label>
+        <textarea id="notes" rows="3" placeholder="Example: Cleaning, technician called, food moved to another fridge..."></textarea>
+
+        <div class="actions" style="margin-top:12px;">
+            <button onclick="saveOneEntry()">Save One Entry</button>
+            <button class="warn" onclick="clearOneEntry()">Clear Saved Entry</button>
+            <a class="btn secondary" href="/fridge-history.html">History</a>
+        </div>
+
+        <div class="saved" id="savedMessage">One entry saved. Open History to see it included in automatic data.</div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0;">Current Synced Entry</h3>
+        <div class="preview" id="preview">No saved entry yet.</div>
+    </div>
+</div>
+
+<script>
+const equipment = [
+    ["Fridge A", "fridge"], ["Freezer B", "freezer"], ["Freezer C", "freezer"],
+    ["Fridge D", "fridge"], ["Fridge E", "fridge"], ["Freezer F", "freezer"],
+    ["Fridge G", "fridge"], ["Fridge H", "fridge"], ["Freezer I", "freezer"]
+];
+
+const fridgeOpening = ["OFF","1°C","2°C","3°C","4°C","5°C","6°C","7°C","8°C","9°C","10°C","CLEANING"];
+const fridgeClosing = ["OFF","4°C","5°C","6°C","7°C","8°C","9°C","10°C","CLEANING"];
+const freezerOpening = ["OFF","-20°C","-19°C","-18°C","-17°C","-16°C","-15°C","-14°C","-13°C","-12°C","-11°C","-10°C","CLEANING"];
+const freezerClosing = ["OFF","-17°C","-16°C","-15°C","-14°C","-13°C","-12°C","-11°C","-10°C","CLEANING"];
+
+function todayISO() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function buildGrid() {
+    const grid = document.getElementById("equipmentGrid");
+    grid.innerHTML = "";
+    equipment.forEach(([name]) => {
+        const id = name.replaceAll(" ","_");
+        const box = document.createElement("div");
+        box.className = "item";
+        box.innerHTML = `<div class="item-title">${name}</div><select id="${id}"></select>`;
+        grid.appendChild(box);
+    });
+    setDefaultTemperatures();
+}
+
+function setOptions(select, options) {
+    select.innerHTML = "";
+    options.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+    });
+}
+
+function setDefaultTemperatures() {
+    const entryType = document.getElementById("entryType").value;
+    equipment.forEach(([name, type]) => {
+        const select = document.getElementById(name.replaceAll(" ","_"));
+        if (type === "fridge" && entryType === "OPENING") setOptions(select, fridgeOpening);
+        if (type === "fridge" && entryType === "CLOSING") setOptions(select, fridgeClosing);
+        if (type === "freezer" && entryType === "OPENING") setOptions(select, freezerOpening);
+        if (type === "freezer" && entryType === "CLOSING") setOptions(select, freezerClosing);
+    });
+
+    // useful default like user's example
+    if (entryType === "OPENING") {
+        setValue("Fridge A", "OFF"); setValue("Freezer B", "OFF"); setValue("Freezer C", "OFF");
+        setValue("Fridge D", "OFF"); setValue("Fridge E", "OFF");
+        setValue("Freezer F", "-20°C"); setValue("Fridge G", "1°C"); setValue("Fridge H", "1°C"); setValue("Freezer I", "-20°C");
+    }
+}
+
+function setValue(name, value) {
+    const el = document.getElementById(name.replaceAll(" ","_"));
+    if (el) el.value = value;
+}
+
+function saveOneEntry() {
+    const entry = {
+        date: document.getElementById("entryDate").value,
+        type: document.getElementById("entryType").value,
+        notes: document.getElementById("notes").value.trim(),
+        values: {}
+    };
+    equipment.forEach(([name]) => entry.values[name] = document.getElementById(name.replaceAll(" ","_")).value);
+    localStorage.setItem("b05_one_fridge_entry", JSON.stringify(entry));
+    document.getElementById("savedMessage").style.display = "block";
+    renderPreview();
+}
+
+function clearOneEntry() {
+    localStorage.removeItem("b05_one_fridge_entry");
+    document.getElementById("savedMessage").style.display = "none";
+    renderPreview();
+}
+
+function renderPreview() {
+    const box = document.getElementById("preview");
+    const entry = JSON.parse(localStorage.getItem("b05_one_fridge_entry") || "null");
+    if (!entry) {
+        box.textContent = "No saved entry yet.";
+        return;
+    }
+    const summary = Object.entries(entry.values).map(([k,v]) => `${k}: ${v}`).join(" | ");
+    box.innerHTML = `<strong>${entry.date} — ${entry.type}</strong><br>${summary}<br>${entry.notes || ""}`;
+}
+
+document.getElementById("entryDate").value = todayISO();
+buildGrid();
+renderPreview();
+</script>
+</body>
+</html>
