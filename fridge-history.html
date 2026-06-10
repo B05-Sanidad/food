@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>B05 Temperature Control History - 60 Days</title>
+<title>B05 Temperature Control History</title>
 <style>
 :root {
     --green:#294b2f;
@@ -19,33 +19,122 @@
     --text:#1e1e1e;
 }
 * { box-sizing:border-box; }
-body { margin:0; font-family:Arial, Helvetica, sans-serif; background:var(--cream); color:var(--text); }
-header { background:var(--green); color:white; padding:14px 12px; text-align:center; }
+body {
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--cream);
+    color:var(--text);
+}
+header {
+    background:var(--green);
+    color:white;
+    padding:14px 12px;
+    text-align:center;
+}
 header h1 { margin:0; font-size:22px; }
 header p { margin:5px 0 0; font-size:13px; }
-.topbar { max-width:1500px; margin:8px auto; padding:0 8px; display:grid; grid-template-columns:1fr auto; gap:8px; align-items:stretch; }
-.summary { display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; }
-.card { background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:6px 7px; font-size:11px; line-height:1.2; }
-.card strong { display:block; color:var(--green); margin-bottom:2px; font-size:12px; }
-.actions { display:flex; gap:6px; }
-button, .back-btn { border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:13px; background:var(--green2); color:white; font-weight:bold; cursor:pointer; text-decoration:none; display:flex; align-items:center; justify-content:center; white-space:nowrap; }
+
+.topbar {
+    max-width:1500px;
+    margin:8px auto;
+    padding:0 8px;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:8px;
+    align-items:stretch;
+}
+.summary {
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:6px;
+}
+.card {
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:6px 7px;
+    font-size:11px;
+    line-height:1.2;
+}
+.card strong {
+    display:block;
+    color:var(--green);
+    margin-bottom:2px;
+    font-size:12px;
+}
+.actions {
+    display:flex;
+    gap:6px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+button, .back-btn {
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px;
+    font-size:13px;
+    background:var(--green2);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    white-space:nowrap;
+}
 .back-btn { background:#555; }
-.table-wrap { max-width:1500px; margin:0 auto 24px; padding:0 8px; }
-table { border-collapse:collapse; width:100%; table-layout:fixed; background:var(--paper); border:1px solid var(--line); font-size:12px; }
-th, td { border:1px solid var(--line); padding:5px 3px; text-align:center; line-height:1.15; word-break:break-word; }
-th { background:var(--green); color:white; position:sticky; top:0; z-index:2; }
+.info-pill {
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px;
+    font-size:12px;
+    color:#555;
+    white-space:nowrap;
+}
+
+.table-wrap {
+    max-width:1500px;
+    margin:0 auto 24px;
+    padding:0 8px;
+}
+table {
+    border-collapse:collapse;
+    width:100%;
+    table-layout:fixed;
+    background:var(--paper);
+    border:1px solid var(--line);
+    font-size:12px;
+}
+th, td {
+    border:1px solid var(--line);
+    padding:5px 3px;
+    text-align:center;
+    line-height:1.15;
+    word-break:break-word;
+}
+th {
+    background:var(--green);
+    color:white;
+    position:sticky;
+    top:0;
+    z-index:2;
+}
 th:nth-child(1), td:nth-child(1) { width:7%; }
 th:nth-child(2), td:nth-child(2) { width:4%; }
 th:nth-child(3), td:nth-child(3) { width:7%; }
-th:nth-child(n+4):nth-child(-n+12), td:nth-child(n+4):nth-child(-n+12) { width:8%; }
+th:nth-child(n+4):nth-child(-n+12),
+td:nth-child(n+4):nth-child(-n+12) { width:8%; }
 th:nth-child(13), td:nth-child(13) { width:6%; }
+
 .opening-row { background:var(--opening); }
 .closing-row { background:var(--closing); }
 .cleaning-row { background:var(--cleaning); }
 .manual-row { background:var(--manual); }
 .manual-row strong { color:#005577; }
 .off-row { background:var(--off); color:#555; }
-.footer { max-width:1400px; margin:0 auto 30px; padding:0 12px; font-size:12px; color:#555; }
+
 @media (max-width:900px) {
     .topbar { grid-template-columns:1fr; }
     .summary { grid-template-columns:1fr 1fr; }
@@ -55,16 +144,44 @@ th:nth-child(13), td:nth-child(13) { width:6%; }
 }
 @media print {
     body { background:white; }
-    header { background:white; color:black; border-bottom:1px solid #000; padding:8px; }
-    .actions, .footer { display:none; }
-    .topbar { display:block; margin:4px 0; padding:0; }
-    .summary { grid-template-columns:repeat(4, 1fr); gap:3px; margin-bottom:4px; }
-    .card { padding:3px; font-size:8px; border-radius:0; }
-    .card strong { font-size:8px; margin-bottom:0; }
-    .table-wrap { max-width:none; margin:0; padding:0; }
+    header {
+        background:white;
+        color:black;
+        border-bottom:1px solid #000;
+        padding:8px;
+    }
+    .actions { display:none; }
+    .topbar {
+        display:block;
+        margin:4px 0;
+        padding:0;
+    }
+    .summary {
+        grid-template-columns:repeat(4, 1fr);
+        gap:3px;
+        margin-bottom:4px;
+    }
+    .card {
+        padding:3px;
+        font-size:8px;
+        border-radius:0;
+    }
+    .card strong {
+        font-size:8px;
+        margin-bottom:0;
+    }
+    .table-wrap {
+        max-width:none;
+        margin:0;
+        padding:0;
+    }
     table { font-size:7.5px; }
     th, td { padding:2px 1px; }
-    th { position:static; background:#ddd; color:black; }
+    th {
+        position:static;
+        background:#ddd;
+        color:black;
+    }
 }
 </style>
 </head>
@@ -81,10 +198,13 @@ th:nth-child(13), td:nth-child(13) { width:6%; }
         <div class="card"><strong>Entries</strong>Opening and closing history for 90 days</div>
         <div class="card"><strong>Cleaning</strong>Every 6 weeks, spread across 1 week. Cleaned unit = CLEANING.</div>
     </section>
+
     <div class="actions">
         <button onclick="window.print()">Print / Save PDF</button>
         <a class="back-btn" href="/food/fridge-entry.html">Back</a>
-\</div>
+        <span class="info-pill">OFF day: Tuesday. Fr = Fridge, Frz = Freezer.</span>
+    </div>
+</div>
 
 <div class="table-wrap">
 <table id="logTable">
@@ -109,10 +229,6 @@ th:nth-child(13), td:nth-child(13) { width:6%; }
 </table>
 </div>
 
-<div class="footer">
-<p><strong>OFF day:</strong> Tuesday. Column names: Fr = Fridge, Frz = Freezer.</p>
-</div>
-
 <script>
 const equipment = [
     ["Fridge A", "fridge"], ["Freezer B", "freezer"], ["Freezer C", "freezer"],
@@ -125,19 +241,35 @@ const OPENING_HOUR = 18;
 const OPENING_MINUTE = 30;
 
 function pad(n) { return String(n).padStart(2, "0"); }
-function ymd(date) { return date.getFullYear() + "-" + pad(date.getMonth()+1) + "-" + pad(date.getDate()); }
-function displayDate(date) { return pad(date.getDate()) + "/" + pad(date.getMonth()+1) + "/" + date.getFullYear(); }
-function addDays(date, days) { const d = new Date(date); d.setDate(d.getDate()+days); d.setHours(0,0,0,0); return d; }
-function dayShort(date) { return date.toLocaleDateString("en-GB", { weekday:"short" }); }
-
-function seededRandom(seed) { let x = Math.sin(seed) * 10000; return x - Math.floor(x); }
+function ymd(date) {
+    return date.getFullYear() + "-" + pad(date.getMonth()+1) + "-" + pad(date.getDate());
+}
+function displayDate(date) {
+    return pad(date.getDate()) + "/" + pad(date.getMonth()+1) + "/" + date.getFullYear();
+}
+function addDays(date, days) {
+    const d = new Date(date);
+    d.setDate(d.getDate()+days);
+    d.setHours(0,0,0,0);
+    return d;
+}
+function dayShort(date) {
+    return date.toLocaleDateString("en-GB", { weekday:"short" });
+}
+function seededRandom(seed) {
+    let x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+}
 function seedFrom(text) {
     let h = 0;
-    for (let i=0; i<text.length; i++) h = Math.imul(31, h) + text.charCodeAt(i) | 0;
+    for (let i=0; i<text.length; i++) {
+        h = Math.imul(31, h) + text.charCodeAt(i) | 0;
+    }
     return Math.abs(h);
 }
-function pick(arr, seed) { return arr[Math.floor(seededRandom(seed) * arr.length)]; }
-
+function pick(arr, seed) {
+    return arr[Math.floor(seededRandom(seed) * arr.length)];
+}
 function tempFor(dateKey, equipmentName, kind, entry) {
     const seed = seedFrom(dateKey + equipmentName + entry);
     if (kind === "fridge" && entry === "OPENING") return pick([1,2,3], seed) + "°C";
@@ -145,22 +277,26 @@ function tempFor(dateKey, equipmentName, kind, entry) {
     if (kind === "freezer" && entry === "OPENING") return pick([-18,-19,-20], seed) + "°C";
     return pick([-15,-16,-17], seed) + "°C";
 }
-
 function isAfterOpeningTime(now) {
-    return now.getHours() > OPENING_HOUR || (now.getHours() === OPENING_HOUR && now.getMinutes() >= OPENING_MINUTE);
+    return now.getHours() > OPENING_HOUR ||
+        (now.getHours() === OPENING_HOUR && now.getMinutes() >= OPENING_MINUTE);
 }
-
 function buildCleaningSchedule(startDate, endDate) {
     const schedule = {};
     let lastCleaningStart = addDays(endDate, -14);
+
     while (lastCleaningStart >= startDate) {
         let workDays = [];
         let x = new Date(lastCleaningStart);
+
         while (workDays.length < equipment.length) {
-            if (x.getDay() !== OFF_DAY && x >= startDate && x <= endDate) workDays.push(new Date(x));
+            if (x.getDay() !== OFF_DAY && x >= startDate && x <= endDate) {
+                workDays.push(new Date(x));
+            }
             x = addDays(x, 1);
             if (x > addDays(endDate, 14)) break;
         }
+
         equipment.forEach((eq, idx) => {
             if (workDays[idx]) {
                 const key = ymd(workDays[idx]);
@@ -168,11 +304,12 @@ function buildCleaningSchedule(startDate, endDate) {
                 schedule[key].push(eq[0]);
             }
         });
+
         lastCleaningStart = addDays(lastCleaningStart, -42);
     }
+
     return schedule;
 }
-
 function getSyncedEntry() {
     try {
         const one = JSON.parse(localStorage.getItem("b05_one_fridge_entry") || "null");
@@ -182,7 +319,6 @@ function getSyncedEntry() {
         return null;
     }
 }
-
 function buildData() {
     const now = new Date();
     const today = new Date(now);
@@ -203,17 +339,24 @@ function buildData() {
 
         if (serviceDate.getDay() === OFF_DAY) {
             rows.push({
-                sortDate:new Date(serviceDate), date:new Date(serviceDate), entry:"OFF",
-                values:equipment.map(()=>"OFF"), note:"Closed", cls:"off-row"
+                sortDate:new Date(serviceDate),
+                date:new Date(serviceDate),
+                entry:"OFF",
+                values:equipment.map(()=>"OFF"),
+                note:"Closed",
+                cls:"off-row"
             });
             continue;
         }
 
         if (serviceDate < today || isAfterOpeningTime(now)) {
             const currentKey = serviceKey + "|OPENING";
+
             if (currentKey === syncedKey) {
                 rows.push({
-                    sortDate:new Date(serviceDate), date:new Date(serviceDate), entry:"OPENING",
+                    sortDate:new Date(serviceDate),
+                    date:new Date(serviceDate),
+                    entry:"OPENING",
                     values:equipment.map(eq => synced.values[eq[0]] || ""),
                     note:synced.notes || "Manual entry",
                     cls:"manual-row"
@@ -221,8 +364,12 @@ function buildData() {
             } else {
                 const cleanedUnits = cleaningSchedule[serviceKey] || [];
                 rows.push({
-                    sortDate:new Date(serviceDate), date:new Date(serviceDate), entry:"OPENING",
-                    values:equipment.map(eq => cleanedUnits.includes(eq[0]) ? "CLEANING" : tempFor(serviceKey, eq[0], eq[1], "OPENING")),
+                    sortDate:new Date(serviceDate),
+                    date:new Date(serviceDate),
+                    entry:"OPENING",
+                    values:equipment.map(eq =>
+                        cleanedUnits.includes(eq[0]) ? "CLEANING" : tempFor(serviceKey, eq[0], eq[1], "OPENING")
+                    ),
                     note:cleanedUnits.length ? "CLEANING - " + cleanedUnits.join(", ") : "",
                     cls:cleanedUnits.length ? "cleaning-row" : "opening-row"
                 });
@@ -232,18 +379,24 @@ function buildData() {
         const closingDate = addDays(serviceDate, 1);
         if (closingDate <= today) {
             const closingKey = ymd(closingDate) + "|CLOSING";
+
             if (closingKey === syncedKey) {
                 rows.push({
-                    sortDate:new Date(closingDate), date:new Date(closingDate), entry:"CLOSING",
+                    sortDate:new Date(closingDate),
+                    date:new Date(closingDate),
+                    entry:"CLOSING",
                     values:equipment.map(eq => synced.values[eq[0]] || ""),
                     note:synced.notes || "Manual entry",
                     cls:"manual-row"
                 });
             } else {
                 rows.push({
-                    sortDate:new Date(closingDate), date:new Date(closingDate), entry:"CLOSING",
+                    sortDate:new Date(closingDate),
+                    date:new Date(closingDate),
+                    entry:"CLOSING",
                     values:equipment.map(eq => tempFor(serviceKey, eq[0], eq[1], "CLOSING")),
-                    note:"", cls:"closing-row"
+                    note:"",
+                    cls:"closing-row"
                 });
             }
         }
@@ -254,12 +407,13 @@ function buildData() {
         const order = {"OPENING":1, "CLOSING":2, "OFF":3};
         return order[a.entry] - order[b.entry];
     });
+
     return rows;
 }
-
 function render() {
     const body = document.getElementById("logBody");
     body.innerHTML = "";
+
     const rows = buildData();
 
     rows.forEach(row => {
@@ -281,10 +435,10 @@ function render() {
         const note = document.createElement("td");
         note.textContent = row.note;
         tr.appendChild(note);
+
         body.appendChild(tr);
     });
 }
-
 render();
 </script>
 </body>
