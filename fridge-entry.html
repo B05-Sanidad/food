@@ -23,7 +23,7 @@ input, select, textarea { width:100%; border:1px solid var(--line); border-radiu
 button, .btn { border:0; border-radius:9px; padding:11px 14px; background:var(--green2); color:white; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
 .btn.secondary { background:#555; }
 .btn.warn { background:#9a4b00; }
-.saved { background:#eef8ef; border:1px solid #b9d9b9; padding:10px; border-radius:9px; display:none; margin-top:10px; }
+.saved { background:#eef8ef; border:1px solid #b9d9b9; padding:10px; border-radius:9px; display:none; margin-top:10px; font-weight:bold; }
 .preview { font-size:13px; line-height:1.5; background:white; border:1px solid var(--line); border-radius:9px; padding:10px; }
 @media (max-width:700px) { .row, .grid { grid-template-columns:1fr; } header h1 { font-size:20px; } }
 </style>
@@ -31,7 +31,7 @@ button, .btn { border:0; border-radius:9px; padding:11px 14px; background:var(--
 <body>
 <header>
     <h1>B05 Fridge & Freezer Entry</h1>
-    <p>One synced entry only — shown inside fridge-history.html</p>
+    <p>One synced entry only — saved in this browser and shown in fridge-history.html</p>
 </header>
 
 <div class="wrap">
@@ -71,6 +71,8 @@ button, .btn { border:0; border-radius:9px; padding:11px 14px; background:var(--
 </div>
 
 <script>
+const STORAGE_KEY = "b05_one_fridge_entry";
+
 const equipment = [
     ["Fridge A", "fridge"], ["Freezer B", "freezer"], ["Freezer C", "freezer"],
     ["Fridge D", "fridge"], ["Fridge E", "fridge"], ["Freezer F", "freezer"],
@@ -110,8 +112,14 @@ function setOptions(select, options) {
     });
 }
 
+function setValue(name, value) {
+    const el = document.getElementById(name.replaceAll(" ","_"));
+    if (el) el.value = value;
+}
+
 function setDefaultTemperatures() {
     const entryType = document.getElementById("entryType").value;
+
     equipment.forEach(([name, type]) => {
         const select = document.getElementById(name.replaceAll(" ","_"));
         if (type === "fridge" && entryType === "OPENING") setOptions(select, fridgeOpening);
@@ -120,17 +128,17 @@ function setDefaultTemperatures() {
         if (type === "freezer" && entryType === "CLOSING") setOptions(select, freezerClosing);
     });
 
-    // useful default like user's example
     if (entryType === "OPENING") {
-        setValue("Fridge A", "OFF"); setValue("Freezer B", "OFF"); setValue("Freezer C", "OFF");
-        setValue("Fridge D", "OFF"); setValue("Fridge E", "OFF");
-        setValue("Freezer F", "-20°C"); setValue("Fridge G", "1°C"); setValue("Fridge H", "1°C"); setValue("Freezer I", "-20°C");
+        setValue("Fridge A", "OFF");
+        setValue("Freezer B", "OFF");
+        setValue("Freezer C", "OFF");
+        setValue("Fridge D", "OFF");
+        setValue("Fridge E", "OFF");
+        setValue("Freezer F", "-20°C");
+        setValue("Fridge G", "1°C");
+        setValue("Fridge H", "1°C");
+        setValue("Freezer I", "-20°C");
     }
-}
-
-function setValue(name, value) {
-    const el = document.getElementById(name.replaceAll(" ","_"));
-    if (el) el.value = value;
 }
 
 function saveOneEntry() {
@@ -140,25 +148,31 @@ function saveOneEntry() {
         notes: document.getElementById("notes").value.trim(),
         values: {}
     };
-    equipment.forEach(([name]) => entry.values[name] = document.getElementById(name.replaceAll(" ","_")).value);
-    localStorage.setItem("b05_one_fridge_entry", JSON.stringify(entry));
+
+    equipment.forEach(([name]) => {
+        entry.values[name] = document.getElementById(name.replaceAll(" ","_")).value;
+    });
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entry));
     document.getElementById("savedMessage").style.display = "block";
     renderPreview();
 }
 
 function clearOneEntry() {
-    localStorage.removeItem("b05_one_fridge_entry");
+    localStorage.removeItem(STORAGE_KEY);
     document.getElementById("savedMessage").style.display = "none";
     renderPreview();
 }
 
 function renderPreview() {
     const box = document.getElementById("preview");
-    const entry = JSON.parse(localStorage.getItem("b05_one_fridge_entry") || "null");
+    const entry = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+
     if (!entry) {
         box.textContent = "No saved entry yet.";
         return;
     }
+
     const summary = Object.entries(entry.values).map(([k,v]) => `${k}: ${v}`).join(" | ");
     box.innerHTML = `<strong>${entry.date} — ${entry.type}</strong><br>${summary}<br>${entry.notes || ""}`;
 }
